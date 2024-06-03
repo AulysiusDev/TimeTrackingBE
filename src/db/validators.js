@@ -30,8 +30,6 @@ export async function validateItem(itemData) {
     name: z.string(),
     boardId: z.number(),
     workspaceId: z.number(),
-    automate: z.boolean(),
-    automationId: z.number().nullable(),
   });
   let hasError;
   let validData = {};
@@ -68,11 +66,70 @@ export async function validateLog(logData) {
     hasError = false;
   } catch (error) {
     console.error(error);
+    console.log("Log validation error");
     hasError = true;
     message = "Invalid log data";
   }
   return {
     data: validLogData,
+    hasError: hasError,
+    message: "",
+  };
+}
+
+export async function validateAutomation(automationData) {
+  const labelSchema = z.object({
+    label: z.string(),
+    index: z.number(),
+  });
+  const automation = z.object({
+    default: z.boolean(),
+    statusColumnId: z.string(),
+    startLabels: z.array(labelSchema).nonempty(),
+    pauseLabels: z.array(labelSchema).nonempty(),
+    endLabels: z.array(labelSchema).nonempty(),
+  });
+  let hasError;
+  let validAutomationData = {};
+  let message;
+  try {
+    validAutomationData = automation.parse(automationData);
+    hasError = false;
+  } catch (error) {
+    console.error(error);
+    console.log("Automation validation error");
+    hasError = true;
+    message = "Invalid automation data";
+  }
+  return {
+    data: validAutomationData,
+    hasError: hasError,
+    message: "",
+  };
+}
+
+export async function validateLogConfig(logConfigData) {
+  const logConfig = z.object({
+    userId: z.number(),
+    itemId: z.number(),
+    subitemId: z.number().nullable(),
+    automationId: z.number().nullable(),
+    automateActive: z.boolean(),
+  });
+  let hasError;
+  let validLogConfigData = {};
+  let message;
+  try {
+    validLogConfigData = logConfig.parse(logConfigData);
+    hasError = false;
+  } catch (error) {
+    console.error(error);
+    console.log("Log Config validation error");
+    hasError = true;
+    message = "Invalid Log Config data";
+  }
+  return {
+    data: validLogConfigData,
     hasError: hasError,
     message: "",
   };

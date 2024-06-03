@@ -1,11 +1,6 @@
 import { validateItem, validateLog, validateUser } from "../db/validators.js";
-import {
-  addUser,
-  createItemEntry,
-  createLogEntry,
-  fetchItem,
-  getUser,
-} from "./crud.js";
+import schemas from "../schema/schemas.js";
+import { createEntry, findById } from "./crud.js";
 import { fetchItemName } from "./monday-service.js";
 
 export async function validateAndCreateItem(body) {
@@ -20,8 +15,6 @@ export async function validateAndCreateItem(body) {
     name: null,
     boardId: body.boardId,
     workspaceId: body.workspaceId,
-    automate: body.automate,
-    automationId: body.automationId,
   };
   //   let id = isSubitem ? body.subitemId : body.itemId;
   //   Check if entry already exists
@@ -29,11 +22,15 @@ export async function validateAndCreateItem(body) {
   let errorMessage = `${isSubitem ? "Subitem" : "Item"} entry already exists`;
   let itemExists = false;
   try {
-    checkItemExists = await fetchItem(id);
+    checkItemExists = await findById(
+      schemas.ItemsTable,
+      schemas.ItemsTable.id,
+      id
+    );
   } catch (error) {
     return { message: errorMessage, data: error, status: 500 };
   }
-  if (checkItemExists === "Item entry exists") {
+  if (checkItemExists.status === 200) {
     itemExists = true;
   }
 
@@ -69,10 +66,10 @@ export async function validateAndCreateItem(body) {
   }
   // Create entry in ItemsTable
   try {
-    const newItem = await createItemEntry(data);
+    const newItem = await createEntry(schemas.ItemsTable, data);
     return {
       message: "New item entry created and data validated.",
-      data: newItem,
+      data: newItem.data,
       status: 201,
     };
   } catch (error) {
@@ -103,17 +100,23 @@ export async function validateAndCreateUsers(userObj) {
   }
   // Check if user already exists
   try {
-    const user = await getUser(data.id);
-    if (user === "No user found") {
+    const user = await findById(
+      schemas.UsersTable,
+      schemas.UsersTable.id,
+      data.id
+    );
+    if (user.status === 404) {
       // Create new entry in UserTable if none exists for that userId
-      const newUser = await addUser({
-        user: {
-          id: data.id,
-        },
+      const newUser = await createEntry(schemas.UsersTable, {
+        id: data.id,
       });
-      return { message: "New user created.", data: newUser.id, status: 201 };
+      return {
+        message: "New user created.",
+        data: newUser.data.id,
+        status: 201,
+      };
     } else {
-      return { message: "User found.", data: user.id, status: 200 };
+      return { message: "User found.", data: user.data[0].id, status: 200 };
     }
   } catch (error) {
     console.error(error);
@@ -136,7 +139,7 @@ export async function validateAndCreateLog(logData) {
     };
   }
   try {
-    const newLogEntry = await createLogEntry(data);
+    const newLogEntry = await createEntry(schemas.LogsTable, data);
     if (newLogEntry === "Error creating Log entry") {
       return { message: newLogEntry, data: newLogEntry, status: 500 };
     } else {

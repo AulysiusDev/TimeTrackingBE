@@ -1,0 +1,20 @@
+{
+  "version": "5",
+  "dialect": "pg",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "5",
+      "when": 1717079702435,
+      "tag": "0000_reflective_wildside",
+      "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "5",
+      "when": 1717082692123,
+      "tag": "0001_warm_the_hand",
+      "breakpoints": true
+    }
+  ]
+}

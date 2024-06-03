@@ -1,107 +1,55 @@
 import { getDrizzleDbClient } from "./db-client.js";
-import { desc, eq, inArray } from "drizzle-orm";
-import schemas from "../schema/schemas.js";
+import { eq, inArray } from "drizzle-orm";
 
-export async function addUser({ user }) {
-  const db = await getDrizzleDbClient();
-  const results = await db.insert(schemas.UsersTable).values(user).returning();
-  return results[0];
-}
-export async function listUsers() {
-  const db = await getDrizzleDbClient();
-  const results = await db
-    .select()
-    .from(schemas.UsersTable)
-    .orderBy(desc(schemas.UsersTable.createdAt));
-  return results;
-}
-export async function getUser(id) {
-  const db = await getDrizzleDbClient();
-  const result = await db
-    .select()
-    .from(schemas.UsersTable)
-    .where(eq(schemas.UsersTable.id, id));
-  if (result.length === 1) {
-    return result[0];
-  }
-  return "No user found";
-}
-
-export async function createLogEntry(logData) {
+export async function createEntry(schema, value) {
   try {
     const db = await getDrizzleDbClient();
-    const results = await db
-      .insert(schemas.LogsTable)
-      .values(logData)
-      .returning();
-    return results[0];
+    const results = await db.insert(schema).values(value).returning();
+    return {
+      message: "Entry created successfully",
+      status: 201,
+      data: results[0],
+    };
   } catch (error) {
     console.error(error);
-    return "Error creating Log entry";
+    return { message: "Failed to create entry", status: 500, data: null };
   }
 }
 
-export async function createItemEntry(itemData) {
+export async function findById(schema, schemaId, id) {
   try {
     const db = await getDrizzleDbClient();
-    const results = await db
-      .insert(schemas.ItemsTable)
-      .values(itemData)
-      .returning();
-    return results[0];
+    const results = await db.select().from(schema).where(eq(schemaId, id));
+    if (results.length > 0) {
+      return {
+        message: "Entry/s fetched successfully",
+        status: 200,
+        data: results,
+      };
+    } else {
+      return {
+        message: "No entries found matching this id",
+        status: 404,
+        data: [],
+      };
+    }
   } catch (error) {
     console.error(error);
-    return "Error creating Item entry";
+    return { message: "Error fetching entry", status: 500, data: null };
   }
-}
-export async function fetchItem(id) {
-  const db = await getDrizzleDbClient();
-  let result;
-  result = await db
-    .select()
-    .from(schemas.ItemsTable)
-    .where(eq(schemas.ItemsTable.id, id));
-  if (result.length) {
-    return "Item entry exists";
-  }
-  return "No item found";
 }
 
-export async function fetchLogsById(id) {
-  const db = await getDrizzleDbClient();
-  let results;
-  results = await db
-    .select()
-    .from(schemas.LogsTable)
-    .where(eq(schemas.LogsTable.itemId, id));
-  if (results.length) {
-    return results;
-  }
-  return "No item found";
-}
-export async function fetchSubitemsByItemId(id) {
-  const db = await getDrizzleDbClient();
-  let results;
-  results = await db
-    .select()
-    .from(schemas.ItemsTable)
-    .where(eq(schemas.ItemsTable.parentItemId, id));
-  if (results.length) {
-    return results;
-  }
-  return "No subitems found";
-}
-
-export async function deleteLogsById(ids) {
-  const db = await getDrizzleDbClient();
+export async function deleteByIds(schema, schemaId, ids) {
+  const idsArr = [...ids];
   try {
+    const db = await getDrizzleDbClient();
     const res = await db
-      .delete(schemas.LogsTable)
-      .where(inArray(schemas.LogsTable.id, ids))
-      .returning({ deletedId: schemas.LogsTable.id });
-    return res;
+      .delete(schema)
+      .where(inArray(schemaId, idsArr))
+      .returning({ deletedId: schemaId });
+    return { message: "Deleted successfully", status: 200, data: res };
   } catch (error) {
     console.error("Error deleting logs:", error);
-    return "Error deleting logs";
+    return { message: "Error deleting logs", status: 500, data: null };
   }
 }

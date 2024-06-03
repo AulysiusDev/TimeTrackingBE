@@ -1,46 +1,56 @@
-require('dotenv').config();
-const { drizzle } = require('drizzle-orm/neon-serverless');
-const { migrate } = require('drizzle-orm/postgres-js/migrator');
-const schema = require('../schema/schemas');
-const ws = require('ws');
-const { Pool, neonConfig } = require('@neondatabase/serverless');
+import dotenv from "dotenv";
+import { drizzle } from "drizzle-orm/neon-serverless";
+import { migrate } from "drizzle-orm/postgres-js/migrator";
+import schema from "../schema/schemas.js";
+import ws from "ws";
+import { Pool, neonConfig } from "@neondatabase/serverless";
+
+dotenv.config();
 
 async function performMigration() {
   const dbUrl = process.env.DATABASE_URL;
   if (!dbUrl) {
-    return;
+    throw new Error(
+      "DATABASE_URL is not defined in the environment variables."
+    );
   }
 
   neonConfig.webSocketConstructor = ws;
   const pool = new Pool({ connectionString: dbUrl });
-  pool.on('error', (err) => console.error(err));
+  pool.on("error", (err) => console.error("Pool error:", err));
 
   const client = await pool.connect();
 
   try {
-    await client.query('BEGIN');
-    const db = await drizzle(client, { schema });
-    await migrate(db, { migrationsFolder: 'src/migrations' });
-    await client.query('COMMIT');
+    await client.query("BEGIN");
+    const db = drizzle(client, { schema });
+    await migrate(db, { migrationsFolder: "migrations" });
+    await client.query("COMMIT");
   } catch (err) {
-    await client.query('ROLLBACK');
+    await client.query("ROLLBACK");
+    console.error("Migration error:", err);
     throw err;
   } finally {
     client.release();
+    await pool.end();
   }
-  await pool.end();
 }
 
-if (require.main === module) {
-  console.log('run Migrations!');
+if (import.meta.main || import.meta.main === undefined) {
+  console.log("Running Migrations!");
   performMigration()
-    .then((val) => {
-      console.log('Migrations done');
+    .then(() => {
+      console.log("Migrations done");
       process.exit(0);
     })
     .catch((err) => {
-      console.log('Migrations error');
-      console.error(err);
+      console.error("Migrations error");
       process.exit(1);
     });
 }
+
+const migrators = {
+  performMigration,
+};
+
+export default migrators;
