@@ -54,17 +54,19 @@ export async function fetchHours(req, res) {
 }
 
 export async function deleteEntries(req, res) {
-  const { ids } = req.body;
+  const { ids, table } = req.body;
   //   Check ids exist
   if (!ids) {
     return res.status(400).json({ message: "No entry IDs send." });
   }
+  if (!table) {
+    return res.status(400).json({ message: "No table name provided." });
+  }
+  if (!schemas[table]) {
+    return res.status(400).json({ message: "Invalid table name provided." });
+  }
   //   Perform deletion from db
-  const deleteRes = await deleteByIds(
-    schemas.LogsTable,
-    schemas.LogsTable.id,
-    ids
-  );
+  const deleteRes = await deleteByIds(schemas[table], schemas[table].id, ids);
   if (deleteRes.status === 500) {
     return res.status(500).json({ message: deleteRes, data: deleteRes });
   }

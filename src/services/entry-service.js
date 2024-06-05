@@ -12,7 +12,6 @@ export async function validateAndCreateItem(body) {
     id: id,
     isSubitem: isSubitem,
     parentItemId: parentItemId,
-    name: null,
     boardId: body.boardId,
     workspaceId: body.workspaceId,
   };
@@ -32,14 +31,6 @@ export async function validateAndCreateItem(body) {
   }
   if (checkItemExists.status === 200) {
     itemExists = true;
-  }
-
-  try {
-    // Fetch item name from monday
-    const name = await fetchItemName(id);
-    itemObj.name = name.data.items[0].name;
-  } catch (error) {
-    return { message: "Error fetching item name", data: error, status: 500 };
   }
 
   // Validate item data
@@ -83,6 +74,7 @@ export async function validateAndCreateItem(body) {
 }
 
 export async function validateAndCreateUsers(userObj) {
+  console.log(userObj);
   // Validate user
   const { data, hasError, message } = await validateUser(userObj);
   if (hasError === true) {

@@ -1,19 +1,25 @@
 import { z } from "zod";
 
-export async function validateUser(userData) {
+export async function validateUser(userObj) {
   const user = z.object({
     id: z.number(),
+    ratePerHour: z.number().nullable(),
+    startTime: z.number().nullable(),
+    endTime: z.number().nullable(),
+    currency: z.string().nullable(),
+    days: z.array(z.number()).nullable(),
   });
   let hasError;
   let validData = {};
   let message;
   try {
-    validData = user.parse(userData);
+    validData = user.parse(userObj);
     hasError = false;
   } catch (error) {
     console.error(error);
+    console.log("User validation error");
     hasError = true;
-    message = "Invalid user id";
+    message = "Invalid user data";
   }
   return {
     data: validData,
@@ -27,7 +33,6 @@ export async function validateItem(itemData) {
     id: z.number(),
     isSubitem: z.boolean(),
     parentItemId: z.number().nullable(),
-    name: z.string(),
     boardId: z.number(),
     workspaceId: z.number(),
   });
@@ -57,6 +62,8 @@ export async function validateLog(logData) {
     totalHours: z.number(),
     billableHours: z.number(),
     note: z.string(),
+    ratePerHour: z.number().nullable(),
+    currency: z.string().nullable(),
   });
   let hasError;
   let validLogData = {};
@@ -77,44 +84,31 @@ export async function validateLog(logData) {
   };
 }
 
-export async function validateAutomation(automationData) {
+export async function validateLogConfig(logConfigData) {
   const labelSchema = z.object({
     label: z.string(),
     index: z.number(),
   });
-  const automation = z.object({
-    default: z.boolean(),
-    statusColumnId: z.string(),
-    startLabels: z.array(labelSchema).nonempty(),
-    pauseLabels: z.array(labelSchema).nonempty(),
-    endLabels: z.array(labelSchema).nonempty(),
-  });
-  let hasError;
-  let validAutomationData = {};
-  let message;
-  try {
-    validAutomationData = automation.parse(automationData);
-    hasError = false;
-  } catch (error) {
-    console.error(error);
-    console.log("Automation validation error");
-    hasError = true;
-    message = "Invalid automation data";
-  }
-  return {
-    data: validAutomationData,
-    hasError: hasError,
-    message: "",
-  };
-}
-
-export async function validateLogConfig(logConfigData) {
   const logConfig = z.object({
+    name: z.string(),
+    boardId: z.number(),
     userId: z.number(),
     itemId: z.number(),
+    startDate: z.date(),
+    custom: z.boolean(),
+    schedule: z.number(),
+    customDays: z.array(z.number()).nullable(),
+    default: z.boolean(),
+    statusColumnId: z.string(),
+    peopleColumnId: z.string(),
+    startLabels: z.array(labelSchema).nonempty(),
+    endLabels: z.array(labelSchema).nonempty(),
+    rateCardId: z.number().nullable(),
+    ratePerHour: z.number().nullable(),
+    currency: z.string().nullable(),
+    endTime: z.number().nullable(),
+    startTime: z.number().nullable(),
     subitemId: z.number().nullable(),
-    automationId: z.number().nullable(),
-    automateActive: z.boolean(),
   });
   let hasError;
   let validLogConfigData = {};

@@ -3,6 +3,7 @@ import { createTimeEntry } from "../controllers/neon-postgres-controller.js";
 import {
   createLogConfigEntry,
   getLogConfig,
+  startStopAutomation,
 } from "../controllers/log-config-controller.js";
 import { generateCsv, generateXlsx } from "../controllers/export-controller.js";
 import {
@@ -12,7 +13,8 @@ import {
 
 const router = express.Router();
 
-router.get("/fetch-item-settings/:itemId", getLogConfig);
+router.post("/start-stop-automation", startStopAutomation);
+router.post("/fetch-item-settings", getLogConfig);
 router.post("/create-log-config", createLogConfigEntry);
 router.post("/create-time-entry", createTimeEntry);
 router.post("/fetch-hours", fetchHours);

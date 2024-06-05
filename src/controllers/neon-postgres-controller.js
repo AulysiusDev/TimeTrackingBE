@@ -17,7 +17,16 @@ export async function createTimeEntry(req, res) {
   let validatedUserIds = [];
   if (userIds.length) {
     for (const userId of userIds) {
-      const validatedUserId = await validateAndCreateUsers({ id: userId });
+      const userObj = {
+        id: userId,
+        ratePerHour: null,
+        startTime: null,
+        endTime: null,
+        currency: null,
+        days: null,
+      };
+      console.log(userObj);
+      const validatedUserId = await validateAndCreateUsers(userObj);
       if (validatedUserId.status === 500 || validatedUserId.status === 400) {
         return res.status(validatedUserId.status).json(validatedUserId);
       }
@@ -35,6 +44,8 @@ export async function createTimeEntry(req, res) {
         totalHours: req.body.totalHours,
         billableHours: req.body.billableHours,
         note: req.body.note,
+        ratePerHour: req.body.ratePerHour,
+        currency: req.body.currency,
       };
       const newLogEntry = await validateAndCreateLog(logData);
       if (newLogEntry.status === 500) {

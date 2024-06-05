@@ -1,79 +1,9 @@
 {
-  "id": "7a9d0fda-c92f-43cb-a1c2-2cc2bfc19777",
+  "id": "529c394d-d7e8-482c-bc1b-5e82f945bbb1",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "5",
   "dialect": "pg",
   "tables": {
-    "automation": {
-      "name": "automation",
-      "schema": "",
-      "columns": {
-        "id": {
-          "name": "id",
-          "type": "serial",
-          "primaryKey": true,
-          "notNull": true
-        },
-        "default": {
-          "name": "default",
-          "type": "boolean",
-          "primaryKey": false,
-          "notNull": false,
-          "default": true
-        },
-        "status_column_id": {
-          "name": "status_column_id",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "start_labels_array": {
-          "name": "start_labels_array",
-          "type": "text[]",
-          "primaryKey": false,
-          "notNull": false,
-          "default": "ARRAY[]::text[]"
-        },
-        "end_labels_array": {
-          "name": "end_labels_array",
-          "type": "text[]",
-          "primaryKey": false,
-          "notNull": false,
-          "default": "ARRAY[]::text[]"
-        },
-        "pause_labels_array": {
-          "name": "pause_labels_array",
-          "type": "text[]",
-          "primaryKey": false,
-          "notNull": false,
-          "default": "ARRAY[]::text[]"
-        },
-        "start_time": {
-          "name": "start_time",
-          "type": "timestamp",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "now()"
-        },
-        "end_time": {
-          "name": "end_time",
-          "type": "timestamp",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "days_array": {
-          "name": "days_array",
-          "type": "text[]",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "ARRAY[]::text[]"
-        }
-      },
-      "indexes": {},
-      "foreignKeys": {},
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {}
-    },
     "items": {
       "name": "items",
       "schema": "",
@@ -96,12 +26,6 @@
           "type": "integer",
           "primaryKey": false,
           "notNull": false
-        },
-        "name": {
-          "name": "name",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true
         },
         "board_id": {
           "name": "board_id",
@@ -128,8 +52,8 @@
       "compositePrimaryKeys": {},
       "uniqueConstraints": {}
     },
-    "logConfigTable": {
-      "name": "logConfigTable",
+    "logconfig": {
+      "name": "logconfig",
       "schema": "",
       "columns": {
         "id": {
@@ -148,7 +72,7 @@
           "name": "item_id",
           "type": "integer",
           "primaryKey": false,
-          "notNull": true
+          "notNull": false
         },
         "subitem_id": {
           "name": "subitem_id",
@@ -163,45 +87,122 @@
           "notNull": false,
           "default": "now()"
         },
-        "complete": {
-          "name": "complete",
-          "type": "boolean",
-          "primaryKey": false,
-          "notNull": false,
-          "default": false
-        },
-        "timer_start_date": {
-          "name": "timer_start_date",
-          "type": "timestamp",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "automation_id": {
-          "name": "automation_id",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "automate_active": {
-          "name": "automate_active",
-          "type": "boolean",
-          "primaryKey": false,
-          "notNull": false,
-          "default": false
-        },
         "created_at": {
           "name": "created_at",
           "type": "timestamp",
           "primaryKey": false,
           "notNull": false,
           "default": "now()"
+        },
+        "people_column_id": {
+          "name": "people_column_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "schedule": {
+          "name": "schedule",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "default": 0
+        },
+        "custom": {
+          "name": "custom",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false,
+          "default": false
+        },
+        "custom_days_array": {
+          "name": "custom_days_array",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "'[]'"
+        },
+        "default": {
+          "name": "default",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false,
+          "default": true
+        },
+        "status_column_id": {
+          "name": "status_column_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "start_labels_array": {
+          "name": "start_labels_array",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "'[]'"
+        },
+        "end_labels_array": {
+          "name": "end_labels_array",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "'[]'"
+        },
+        "start_time": {
+          "name": "start_time",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "end_time": {
+          "name": "end_time",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "hours": {
+          "name": "hours",
+          "type": "numeric(8, 2)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "name": {
+          "name": "name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "rate_card_id": {
+          "name": "rate_card_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "rate_per_hour": {
+          "name": "rate_per_hour",
+          "type": "numeric(8, 2)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "currency": {
+          "name": "currency",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "'USD'"
+        },
+        "board_id": {
+          "name": "board_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
         }
       },
       "indexes": {},
       "foreignKeys": {
-        "logConfigTable_user_id_users_id_fk": {
-          "name": "logConfigTable_user_id_users_id_fk",
-          "tableFrom": "logConfigTable",
+        "logconfig_user_id_users_id_fk": {
+          "name": "logconfig_user_id_users_id_fk",
+          "tableFrom": "logconfig",
           "tableTo": "users",
           "columnsFrom": [
             "user_id"
@@ -212,9 +213,9 @@
           "onDelete": "no action",
           "onUpdate": "no action"
         },
-        "logConfigTable_item_id_items_id_fk": {
-          "name": "logConfigTable_item_id_items_id_fk",
-          "tableFrom": "logConfigTable",
+        "logconfig_item_id_items_id_fk": {
+          "name": "logconfig_item_id_items_id_fk",
+          "tableFrom": "logconfig",
           "tableTo": "items",
           "columnsFrom": [
             "item_id"
@@ -225,12 +226,12 @@
           "onDelete": "no action",
           "onUpdate": "no action"
         },
-        "logConfigTable_automation_id_automation_id_fk": {
-          "name": "logConfigTable_automation_id_automation_id_fk",
-          "tableFrom": "logConfigTable",
-          "tableTo": "automation",
+        "logconfig_rate_card_id_users_id_fk": {
+          "name": "logconfig_rate_card_id_users_id_fk",
+          "tableFrom": "logconfig",
+          "tableTo": "users",
           "columnsFrom": [
-            "automation_id"
+            "rate_card_id"
           ],
           "columnsTo": [
             "id"
@@ -295,6 +296,20 @@
           "primaryKey": false,
           "notNull": false,
           "default": "now()"
+        },
+        "rate_per_hour": {
+          "name": "rate_per_hour",
+          "type": "numeric(8, 2)",
+          "primaryKey": false,
+          "notNull": false,
+          "default": null
+        },
+        "currency": {
+          "name": "currency",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "default": null
         }
       },
       "indexes": {},
@@ -329,71 +344,8 @@
       "compositePrimaryKeys": {},
       "uniqueConstraints": {}
     },
-    "pauseLogs": {
-      "name": "pauseLogs",
-      "schema": "",
-      "columns": {
-        "id": {
-          "name": "id",
-          "type": "serial",
-          "primaryKey": true,
-          "notNull": true
-        },
-        "log_config_id": {
-          "name": "log_config_id",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "start_date": {
-          "name": "start_date",
-          "type": "timestamp",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "now()"
-        },
-        "end_date": {
-          "name": "end_date",
-          "type": "timestamp",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "complete": {
-          "name": "complete",
-          "type": "boolean",
-          "primaryKey": false,
-          "notNull": true,
-          "default": false
-        },
-        "created_at": {
-          "name": "created_at",
-          "type": "timestamp",
-          "primaryKey": false,
-          "notNull": false,
-          "default": "now()"
-        }
-      },
-      "indexes": {},
-      "foreignKeys": {
-        "pauseLogs_log_config_id_logConfigTable_id_fk": {
-          "name": "pauseLogs_log_config_id_logConfigTable_id_fk",
-          "tableFrom": "pauseLogs",
-          "tableTo": "logConfigTable",
-          "columnsFrom": [
-            "log_config_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
-        }
-      },
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {}
-    },
-    "rateCards": {
-      "name": "rateCards",
+    "users": {
+      "name": "users",
       "schema": "",
       "columns": {
         "id": {
@@ -411,23 +363,21 @@
         },
         "start_time": {
           "name": "start_time",
-          "type": "timestamp",
+          "type": "integer",
           "primaryKey": false,
-          "notNull": true,
-          "default": "now()"
+          "notNull": false
         },
         "end_time": {
           "name": "end_time",
-          "type": "timestamp",
+          "type": "integer",
           "primaryKey": false,
           "notNull": false
         },
         "days_array": {
           "name": "days_array",
-          "type": "text[]",
+          "type": "text",
           "primaryKey": false,
-          "notNull": true,
-          "default": "ARRAY[]::text[]"
+          "notNull": false
         },
         "currency": {
           "name": "currency",
@@ -446,49 +396,6 @@
       },
       "indexes": {},
       "foreignKeys": {},
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {}
-    },
-    "users": {
-      "name": "users",
-      "schema": "",
-      "columns": {
-        "id": {
-          "name": "id",
-          "type": "serial",
-          "primaryKey": true,
-          "notNull": true
-        },
-        "rate_card_id": {
-          "name": "rate_card_id",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "created_at": {
-          "name": "created_at",
-          "type": "timestamp",
-          "primaryKey": false,
-          "notNull": false,
-          "default": "now()"
-        }
-      },
-      "indexes": {},
-      "foreignKeys": {
-        "users_rate_card_id_rateCards_id_fk": {
-          "name": "users_rate_card_id_rateCards_id_fk",
-          "tableFrom": "users",
-          "tableTo": "rateCards",
-          "columnsFrom": [
-            "rate_card_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
-        }
-      },
       "compositePrimaryKeys": {},
       "uniqueConstraints": {}
     }

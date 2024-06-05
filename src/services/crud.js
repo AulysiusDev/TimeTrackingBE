@@ -40,16 +40,44 @@ export async function findById(schema, schemaId, id) {
 }
 
 export async function deleteByIds(schema, schemaId, ids) {
-  const idsArr = [...ids];
+  console.log(ids);
+  if (!Array.isArray(ids)) {
+    ids = [ids];
+  }
   try {
     const db = await getDrizzleDbClient();
     const res = await db
       .delete(schema)
-      .where(inArray(schemaId, idsArr))
+      .where(inArray(schemaId, ids))
       .returning({ deletedId: schemaId });
     return { message: "Deleted successfully", status: 200, data: res };
   } catch (error) {
     console.error("Error deleting logs:", error);
     return { message: "Error deleting logs", status: 500, data: null };
+  }
+}
+
+export async function updateField(
+  schema,
+  schemaId,
+  schemaField,
+  updateObj,
+  id
+) {
+  try {
+    const db = await getDrizzleDbClient();
+    const updatedValue = await db
+      .update(schema)
+      .set(updateObj)
+      .where(eq(schemaId, id))
+      .returning({ updatedField: schemaField });
+    return { message: "Success", status: 200, data: updatedValue };
+  } catch (error) {
+    console.error(error);
+    return {
+      message: error.message || "Error updating field",
+      status: 500,
+      data: error,
+    };
   }
 }
