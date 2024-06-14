@@ -27,6 +27,7 @@ export async function getLogConfig(req, res) {
 }
 
 export async function createLogConfigEntry(req, res) {
+  console.dir(req.body, { depth: null });
   // Validate and create item
   const validatedItem = await validateAndCreateItem(req.body);
   if (validatedItem.status === 500) {
@@ -47,6 +48,7 @@ export async function createLogConfigEntry(req, res) {
   if (validatedUser.status === 500 || validatedUser.status === 400) {
     return res.status(validatedUser.status).json(validatedUser);
   }
+  console.log({ body: req.body });
   const logConfigObj = {
     itemId: req.body.itemId,
     subitemId: req.body.subitemId,
@@ -67,6 +69,9 @@ export async function createLogConfigEntry(req, res) {
     startDate: new Date(),
     schedule: req.body.schedule,
     peopleColumnId: req.body.peopleColumnId,
+    active: req.body.active,
+    workspaceId: req.body.workspaceId,
+    hours: req.body.hours,
   };
   const validatedLogConfig = await validateAndCreateLogConfig(logConfigObj);
   if (validatedLogConfig.status === 500) {
@@ -86,12 +91,11 @@ export async function createLogConfigEntry(req, res) {
 
 export async function startStopAutomation(req, res) {
   const { logId, action } = await req.body;
-  const startDate = action ? new Date() : null;
   const startStopRes = await updateField(
     schemas.LogConfigTable,
     schemas.LogConfigTable.id,
-    schemas.LogConfigTable.startDate,
-    { startDate: startDate },
+    schemas.LogConfigTable.active,
+    { active: action },
     logId
   );
   if (startStopRes.status === 500) {

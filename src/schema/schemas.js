@@ -30,12 +30,11 @@ const ItemsTable = pgTable("items", {
 
 const LogConfigTable = pgTable("logconfig", {
   id: serial("id").primaryKey(),
+  workspaceId: integer("workspace_id"),
   userId: integer("user_id")
     .notNull()
     .references(() => UsersTable.id),
   itemId: integer("item_id").references(() => ItemsTable.id),
-  // If this is filled the logConfig is for a subitem
-  subitemId: integer("subitem_id"),
   // This gets set when the automation gets started, and it gets cleared when automation is stopped
   startDate: timestamp("start_date").defaultNow(),
   createdAt: timestamp("created_at").defaultNow(),
@@ -55,6 +54,7 @@ const LogConfigTable = pgTable("logconfig", {
   startTime: integer("start_time"),
   // Time user enxs work if schedule is 1
   endTime: integer("end_time"),
+  subitemId: integer("subitem_id"),
   hours: numeric("hours", { precision: 8, scale: 2 }),
   name: text("name"),
   // This will be the user id if schedule is 2
@@ -65,6 +65,7 @@ const LogConfigTable = pgTable("logconfig", {
   ratePerHour: numeric("rate_per_hour", { precision: 8, scale: 2 }),
   currency: text("currency").default("USD"),
   boardId: text("board_id").notNull(),
+  active: boolean("active").default(false),
 });
 
 const logsConfigRelations = relations(LogConfigTable, ({ one }) => ({

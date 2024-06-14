@@ -1,5 +1,5 @@
 import express from "express";
-import { createTimeEntry } from "../controllers/neon-postgres-controller.js";
+import { createTimeEntry } from "../controllers/entry-controller.js";
 import {
   createLogConfigEntry,
   getLogConfig,
@@ -10,6 +10,12 @@ import {
   deleteEntries,
   fetchHours,
 } from "../controllers/display-controller.js";
+import { authorizeRequest } from "../middleware.js";
+import {
+  handleAutomationTrigger,
+  subscribe,
+  unsubscribe,
+} from "../controllers/automation-controller.js";
 
 const router = express.Router();
 
@@ -21,5 +27,8 @@ router.post("/fetch-hours", fetchHours);
 router.delete("/delete-entries", deleteEntries);
 router.post("/generate-xlsx", generateXlsx);
 router.post("/generate-csv", generateCsv);
+router.post("/automation-triggered", authorizeRequest, handleAutomationTrigger);
+router.post("/unsubscribe", authorizeRequest, unsubscribe);
+router.post("/subscribe", authorizeRequest, subscribe);
 
 export default router;

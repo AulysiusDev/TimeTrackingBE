@@ -1,0 +1,1 @@
+ALTER TABLE "logconfig" ADD COLUMN "workspace_id" integer;

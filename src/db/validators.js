@@ -91,6 +91,7 @@ export async function validateLogConfig(logConfigData) {
   });
   const logConfig = z.object({
     name: z.string(),
+    workspaceId: z.number(),
     boardId: z.number(),
     userId: z.number(),
     itemId: z.number(),
@@ -109,6 +110,8 @@ export async function validateLogConfig(logConfigData) {
     endTime: z.number().nullable(),
     startTime: z.number().nullable(),
     subitemId: z.number().nullable(),
+    active: z.boolean(),
+    hours: z.number(),
   });
   let hasError;
   let validLogConfigData = {};

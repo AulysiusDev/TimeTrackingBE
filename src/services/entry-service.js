@@ -1,7 +1,69 @@
 import { validateItem, validateLog, validateUser } from "../db/validators.js";
 import schemas from "../schema/schemas.js";
 import { createEntry, findById } from "./crud.js";
-import { fetchItemName } from "./monday-service.js";
+
+// services/timeEntryService.js
+export async function createTimeEntryService(body) {
+  const validatedItem = await validateAndCreateItem(body);
+  if (validatedItem.status === 500) {
+    return { status: 500, message: "Server error.", data: validatedItem };
+  }
+  if (validatedItem.status === 400) {
+    return { status: 400, message: "Client error.", data: validatedItem };
+  }
+
+  const userIds = body.userIds || [];
+  let validatedUserIds = [];
+  if (userIds.length) {
+    for (const userId of userIds) {
+      const userObj = {
+        id: userId,
+        ratePerHour: null,
+        startTime: null,
+        endTime: null,
+        currency: null,
+        days: null,
+      };
+      const validatedUserId = await validateAndCreateUsers(userObj);
+      if (validatedUserId.status === 500 || validatedUserId.status === 400) {
+        return { status: validatedUserId.status, ...validatedUserId };
+      }
+      validatedUserIds.push(validatedUserId.data);
+    }
+
+    let newLogs = [];
+    for (const userId of validatedUserIds) {
+      let logData = {
+        userId: userId,
+        itemId: validatedItem.data.id,
+        date: new Date(body.date),
+        totalHours: body.totalHours,
+        billableHours: body.billableHours,
+        note: body.note,
+        ratePerHour: body.ratePerHour,
+        currency: body.currency,
+      };
+      const newLogEntry = await validateAndCreateLog(logData);
+      if (newLogEntry.status === 500) {
+        return newLogEntry;
+      } else if (newLogEntry.status === 400) {
+        return newLogEntry;
+      }
+      newLogs.push(newLogEntry.data);
+    }
+
+    return {
+      status: 201,
+      message: "Time entry created successfully",
+      data: newLogs,
+    };
+  } else {
+    return {
+      status: 400,
+      message: "No user ids provided. Please select a user",
+    };
+  }
+}
 
 export async function validateAndCreateItem(body) {
   // Create item obj from body
@@ -74,7 +136,6 @@ export async function validateAndCreateItem(body) {
 }
 
 export async function validateAndCreateUsers(userObj) {
-  console.log(userObj);
   // Validate user
   const { data, hasError, message } = await validateUser(userObj);
   if (hasError === true) {

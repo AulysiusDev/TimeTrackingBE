@@ -17,6 +17,15 @@ export async function fetchHours(req, res) {
     const { message, status, data } = await fetchLogs(itemId);
     if (status === 500) {
       return res.status(status).json({ message: message, data: data });
+    } else if (status === 404) {
+      return res.status(404).json({
+        total: 0,
+        billable: 0,
+        itemLogs: [],
+        subitemLogs: [],
+        subitemBillable: 0,
+        subitemTotal: 0,
+      });
     } else {
       itemsLogs = data.itemsLogs;
       subitemsLogs = data.subitemsLogs;

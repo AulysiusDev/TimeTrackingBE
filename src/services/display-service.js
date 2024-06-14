@@ -5,7 +5,6 @@ import schemas from "../schema/schemas.js";
 export async function fetchLogs(itemId) {
   let itemsLogs = [];
   let subitemsLogs = [];
-
   // Fetch items db
   try {
     let itemlogsRes = await findById(
@@ -44,6 +43,8 @@ export async function fetchLogs(itemId) {
         // Process and add subitems
         if (newSubitemLogs.status === 200) {
           newSubitemLogs.data.forEach((log) => subitemsLogs.push(log));
+        } else if (newSubitemLogs.status === 404) {
+          return { message: "No logs found", status: 404, data: [] };
         } else {
           return {
             message: "There was an error fetching items",

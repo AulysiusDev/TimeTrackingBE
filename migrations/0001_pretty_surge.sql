@@ -1,0 +1,1 @@
+ALTER TABLE "logconfig" ADD COLUMN "active" boolean DEFAULT false;

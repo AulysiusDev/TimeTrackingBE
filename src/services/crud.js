@@ -40,7 +40,6 @@ export async function findById(schema, schemaId, id) {
 }
 
 export async function deleteByIds(schema, schemaId, ids) {
-  console.log(ids);
   if (!Array.isArray(ids)) {
     ids = [ids];
   }
