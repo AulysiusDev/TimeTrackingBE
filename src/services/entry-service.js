@@ -191,6 +191,7 @@ export async function validateAndCreateLog(logData) {
       status: 500,
     };
   }
+  console.log({ newLog: data });
   try {
     const newLogEntry = await createEntry(schemas.LogsTable, data);
     if (newLogEntry === "Error creating Log entry") {

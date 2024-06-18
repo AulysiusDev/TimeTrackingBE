@@ -16,6 +16,7 @@ export async function handleAutomationTriggerService(payload) {
     itemId,
     columnValue
   );
+  console.log({ changedAt });
   const logConfigRes = await fetchLogConfig(itemId, boardId, columnId);
   if (logConfigRes.status === 404) {
     return { status: 404, message: "No automations set", data: logConfigRes };
@@ -32,6 +33,7 @@ export async function handleAutomationTriggerService(payload) {
     JSON.parse(logConfigRes.data.endLabels),
     columnValue
   );
+  console.log({ createLog });
   // If starting tracking for entry log
   if (createLog === false) {
     const updateRes = await updateField(
@@ -41,12 +43,13 @@ export async function handleAutomationTriggerService(payload) {
       { startDate: new Date() },
       logConfigRes.data.id
     );
+    console.log({ updateRes });
   }
-
   const assignedItemUsers = await fetchUsers(
     itemId,
     logConfigRes.data.peopleColumnId
   );
+  console.log({ assignedItemUsers });
   if (!assignedItemUsers.data) {
     return { message: "No user assigned", status: 404, data: [] };
   }
@@ -63,18 +66,20 @@ export async function handleAutomationTriggerService(payload) {
       notificationText
     );
   }
-  console.log({ createLog });
   // Create entry log and reset start date to null
   if (createLog === true) {
     console.log("Creating log");
-    logConfigRes.data.endDate = changedAt || new Date();
+    logConfigRes.data.endDate = changedAt.data
+      ? new Date(changedAt.data)
+      : new Date(Date.now());
     const datesArr = createDatesArr(logConfigRes.data);
+    console.log({ datesArr });
     for (const date of datesArr) {
       const hours = parseFloat(
         calculateHours(logConfigRes.data, date).toFixed(2)
       );
       console.log({ hours });
-      await createTimeEntryService({
+      const response = await createTimeEntryService({
         boardId: boardId,
         workspaceId: logConfigRes.data.workspaceId,
         date: new Date(date),
@@ -88,14 +93,16 @@ export async function handleAutomationTriggerService(payload) {
         subitemId: logConfigRes.data.subitemId,
         itemId: logConfigRes.data.itemId,
       });
+      console.log({ response });
     }
-    await updateField(
+    const response = await updateField(
       LogConfigTable,
       LogConfigTable.id,
       LogConfigTable.startDate,
       { startDate: null },
       logConfigRes.data.id
     );
+    console.log({ response });
   }
 
   return {
@@ -259,6 +266,10 @@ async function findCreatedAtStatusChange(
         return false;
       }
     );
+    const datesArray = columnChangeUpdates.map(
+      (c) => new Date(c.created_at / 10000)
+    );
+    console.log({ datesArray });
     let myDate = new Date(columnChangeUpdates[0].created_at / 10000);
     return {
       message: "Success sending notifications",

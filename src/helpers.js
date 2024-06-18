@@ -18,13 +18,14 @@ export const getSecret = (secretKey, options = {}) => {
 };
 
 export function createDatesArr(logDetails) {
+  console.log({ logDetails });
   let datesArr = [];
   if (
     new Date(logDetails.startDate).getDate() ===
     new Date(logDetails.endDate).getDate()
   ) {
     datesArr.push(logDetails.startDate);
-  } else if (logDetails.custom === false) {
+  } else {
     datesArr = createDaysArr(
       logDetails.startDate,
       logDetails.endDate,
@@ -57,52 +58,52 @@ function createDaysArr(startDateStr, endDateStr, customDaysArr) {
   return daysArr;
 }
 
-export function calculateHours(logConfig, currentDate) {
-  const endDate = new Date(logConfig.endDate).getDate();
-  const date = new Date(currentDate).getDate();
+export function calculateHours(logConfig, current) {
+  console.log({ logConfig });
+  const currentDate = new Date(current);
+  const endDate = new Date(logConfig.endDate);
   const startDate = new Date(logConfig.startDate);
-  let startMinutesFraction = 0;
-  let startTime = logConfig.startTime;
+
+  let startTime = Math.max(
+    startDate.getUTCHours() + startDate.getUTCMinutes() / 60,
+    logConfig.startTime
+  );
+  let endTime = endDate.getUTCHours() + endDate.getUTCMinutes() / 60;
+  let maxHours =
+    logConfig.schedule === 1
+      ? logConfig.endTime - logConfig.startTime
+      : parseFloat(logConfig.hours);
+
   if (
-    date === startDate.getDate() &&
-    startDate.getHours() >= logConfig.startTime
+    endDate.getUTCDate() === startDate.getUTCDate() &&
+    startDate.getUTCDate() === currentDate.getUTCDate()
   ) {
-    startTime = startDate.getHours();
-    startMinutesFraction = startDate.getMinutes() / 60;
+    console.log("Same day");
+    if (logConfig.schedule === 1) {
+      endTime = Math.min(logConfig.endTime, endTime);
+    }
+    console.log({ startTime });
+    console.log({ endTime });
+    console.log({ startMinusEnd: endTime - startTime });
+    console.log(Math.min(maxHours, endTime - startTime));
+    return parseFloat(Math.min(maxHours, endTime - startTime).toFixed(2));
   }
-  const currentHours = currentDate.getHours();
-  const currentMinutes = currentDate.getMinutes();
-  const startTimeHours = startTime + startMinutesFraction;
-  const hours =
-    logConfig.schedule === 0
-      ? logConfig.hours
-      : logConfig.endTime - startTimeHours;
-  const startMaxSum =
-    logConfig.schedule === 0
-      ? startTimeHours + parseFloat(logConfig.hours)
-      : parseInt(logConfig.endTime);
-  const currentMinuteFraction = parseFloat((currentMinutes / 60).toFixed(2));
-  const diff = currentHours + currentMinuteFraction - startMaxSum;
-  // if not same date, save full hours
-  if (date !== endDate) {
-    return parseFloat(logConfig.hours);
-  } else {
-    // current time is before startTime, so no hours
-    if (startTimeHours > currentHours) {
-      return 0;
-    }
-    // same hour as startTime, so only log the minutes
-    if (startTime === currentHours) {
-      return currentMinuteFraction - startMinutesFraction;
-    }
-    // Worked full hours
-    if (diff > 0) {
-      return parseFloat(logConfig.hours);
-    }
-    // worked less than full day but more than 1 hour
-    if (diff <= 0) {
-      return hours - Math.abs(parseFloat(diff.toFixed(2)));
-    }
+
+  if (startDate.getUTCDate() === currentDate.getUTCDate()) {
+    console.log("Start day");
+    return parseFloat(
+      logConfig.endTime
+        ? Math.min(maxHours, logConfig.endTime - startTime)
+        : Math.min(maxHours, 24 - startTime).toFixed(2)
+    );
   }
-  return 0;
+
+  if (endDate.getUTCDate() === currentDate.getUTCDate()) {
+    console.log("End day");
+    startTime = logConfig.startTime;
+    endTime =
+      logConfig.schedule === 1 ? Math.min(logConfig.endTime, endTime) : endTime;
+    return parseFloat(Math.min(endTime - startTime, maxHours).toFixed(2));
+  }
+  return parseFloat(maxHours.toFixed(2));
 }
