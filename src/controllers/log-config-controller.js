@@ -27,7 +27,6 @@ export async function getLogConfig(req, res) {
 }
 
 export async function createLogConfigEntry(req, res) {
-  console.dir(req.body, { depth: null });
   // Validate and create item
   const validatedItem = await validateAndCreateItem(req.body);
   if (validatedItem.status === 500) {
@@ -48,7 +47,6 @@ export async function createLogConfigEntry(req, res) {
   if (validatedUser.status === 500 || validatedUser.status === 400) {
     return res.status(validatedUser.status).json(validatedUser);
   }
-  console.log({ body: req.body });
   const logConfigObj = {
     itemId: req.body.itemId,
     subitemId: req.body.subitemId,
@@ -62,7 +60,7 @@ export async function createLogConfigEntry(req, res) {
     endTime: req.body.endTime,
     name: req.body.name,
     rateCardId: req.body.rateCardId,
-    ratePerHour: req.body.ratePerHour,
+    ratePerHour: parseFloat(req.body.ratePerHour),
     currency: req.body.currency,
     boardId: req.body.boardId,
     userId: req.body.creatorId,
@@ -71,7 +69,7 @@ export async function createLogConfigEntry(req, res) {
     peopleColumnId: req.body.peopleColumnId,
     active: req.body.active,
     workspaceId: req.body.workspaceId,
-    hours: req.body.hours,
+    hours: parseFloat(req.body.hours),
   };
   const validatedLogConfig = await validateAndCreateLogConfig(logConfigObj);
   if (validatedLogConfig.status === 500) {
@@ -98,12 +96,23 @@ export async function startStopAutomation(req, res) {
     { active: action },
     logId
   );
-  if (startStopRes.status === 500) {
-    return res
-      .status(500)
-      .json({ message: startStopRes.message, data: startStopRes.data });
+  const startDateRes = await updateField(
+    schemas.LogConfigTable,
+    schemas.LogConfigTable.id,
+    schemas.LogConfigTable.startDate,
+    { startDate: null },
+    logId
+  );
+
+  if (startStopRes.status === 500 || startDateRes === 500) {
+    const message = startDateRes.message === "Success";
+    return res.status(500).json({ message: startStopRes.message, data: {} });
   }
-  return res
-    .status(200)
-    .json({ message: "Success", data: startStopRes.data[0] });
+  const updatedFields = {
+    active: startStopRes.data[0].updatedField,
+    startDate: startDateRes.data[0].updatedField,
+  };
+  console.log("success");
+  console.log({ updatedFields });
+  return res.status(200).json({ message: "Success", data: { updatedFields } });
 }

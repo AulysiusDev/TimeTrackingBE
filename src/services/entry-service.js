@@ -40,7 +40,7 @@ export async function createTimeEntryService(body) {
         totalHours: body.totalHours,
         billableHours: body.billableHours,
         note: body.note,
-        ratePerHour: body.ratePerHour,
+        ratePerHour: parseFloat(body.ratePerHour),
         currency: body.currency,
       };
       const newLogEntry = await validateAndCreateLog(logData);

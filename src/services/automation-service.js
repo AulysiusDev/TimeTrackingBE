@@ -6,7 +6,6 @@ import initMondayClient from "monday-sdk-js";
 import { createTimeEntryService } from "./entry-service.js";
 import { calculateHours, createDatesArr } from "../helpers.js";
 
-// services/automationService.js
 export async function handleAutomationTriggerService(payload) {
   const { previousColumnValue, columnValue, boardId, itemId, columnId } =
     payload.inboundFieldValues;
@@ -16,7 +15,6 @@ export async function handleAutomationTriggerService(payload) {
     itemId,
     columnValue
   );
-  console.log({ changedAt });
   const logConfigRes = await fetchLogConfig(itemId, boardId, columnId);
   if (logConfigRes.status === 404) {
     return { status: 404, message: "No automations set", data: logConfigRes };
@@ -33,7 +31,13 @@ export async function handleAutomationTriggerService(payload) {
     JSON.parse(logConfigRes.data.endLabels),
     columnValue
   );
-  console.log({ createLog });
+  const assignedItemUsers = await fetchUsers(
+    itemId,
+    logConfigRes.data.peopleColumnId
+  );
+  if (!assignedItemUsers.data) {
+    return { message: "No user assigned", status: 404, data: [] };
+  }
   // If starting tracking for entry log
   if (createLog === false) {
     const updateRes = await updateField(
@@ -43,15 +47,12 @@ export async function handleAutomationTriggerService(payload) {
       { startDate: new Date() },
       logConfigRes.data.id
     );
-    console.log({ updateRes });
-  }
-  const assignedItemUsers = await fetchUsers(
-    itemId,
-    logConfigRes.data.peopleColumnId
-  );
-  console.log({ assignedItemUsers });
-  if (!assignedItemUsers.data) {
-    return { message: "No user assigned", status: 404, data: [] };
+    const notificationText = `A new time tracking log has been opened for you on item-${itemId}. To end the tracking and create the log, change the status to match the specified "End label".`;
+    await sendNotifications(
+      assignedItemUsers.data.personsAndTeams.map((obj) => obj.id),
+      itemId,
+      notificationText
+    );
   }
   // If label changed to unrelated label but time tracking start date has been set
   if (
@@ -78,7 +79,6 @@ export async function handleAutomationTriggerService(payload) {
       const hours = parseFloat(
         calculateHours(logConfigRes.data, date).toFixed(2)
       );
-      console.log({ hours });
       const response = await createTimeEntryService({
         boardId: boardId,
         workspaceId: logConfigRes.data.workspaceId,
@@ -93,8 +93,15 @@ export async function handleAutomationTriggerService(payload) {
         subitemId: logConfigRes.data.subitemId,
         itemId: logConfigRes.data.itemId,
       });
-      console.log({ response });
     }
+
+    const notificationText = `A new log entry has been created for you on item-${itemId}`;
+    await sendNotifications(
+      assignedItemUsers.data.personsAndTeams.map((obj) => obj.id),
+      itemId,
+      notificationText
+    );
+
     const response = await updateField(
       LogConfigTable,
       LogConfigTable.id,
@@ -102,7 +109,6 @@ export async function handleAutomationTriggerService(payload) {
       { startDate: null },
       logConfigRes.data.id
     );
-    console.log({ response });
   }
 
   return {
@@ -212,6 +218,7 @@ export async function sendNotifications(userIds, target, text) {
         targetType: "Project",
       };
       const res = await monday.api(query, { variables });
+      console.dir({ res }, { depth: null });
     }
     return {
       message: "Success sending notifications",
@@ -266,10 +273,6 @@ async function findCreatedAtStatusChange(
         return false;
       }
     );
-    const datesArray = columnChangeUpdates.map(
-      (c) => new Date(c.created_at / 10000)
-    );
-    console.log({ datesArray });
     let myDate = new Date(columnChangeUpdates[0].created_at / 10000);
     return {
       message: "Success sending notifications",

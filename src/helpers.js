@@ -20,16 +20,26 @@ export const getSecret = (secretKey, options = {}) => {
 export function createDatesArr(logDetails) {
   console.log({ logDetails });
   let datesArr = [];
+  const startDate = new Date(logDetails.startDate);
+  const endDate = new Date(logDetails.endDate);
+
   if (
-    new Date(logDetails.startDate).getDate() ===
-    new Date(logDetails.endDate).getDate()
+    startDate.toISOString().split("T")[0] ===
+    endDate.toISOString().split("T")[0]
   ) {
     datesArr.push(logDetails.startDate);
   } else {
+    let customDaysArr = [];
+    try {
+      customDaysArr = JSON.parse(logDetails.customDays);
+    } catch (e) {
+      customDaysArr = [];
+    }
+
     datesArr = createDaysArr(
       logDetails.startDate,
       logDetails.endDate,
-      logDetails.customDays || []
+      customDaysArr
     );
   }
   return datesArr;
@@ -39,8 +49,9 @@ function createDaysArr(startDateStr, endDateStr, customDaysArr) {
   const startDate = new Date(startDateStr);
   const endDate = new Date(endDateStr);
   const daysArr = [];
+
   for (
-    const currentDate = startDate;
+    let currentDate = new Date(startDate);
     currentDate <= endDate;
     currentDate.setDate(currentDate.getDate() + 1)
   ) {
