@@ -35,5 +35,7 @@ app.listen(currentPort, () => {
   }
 });
 app.get("/", (req, res) => {
-  return res.status(200).json({ message: "Recieved" });
+  return res
+    .status(200)
+    .json({ message: `Server Running on port ${currentPort}` });
 });

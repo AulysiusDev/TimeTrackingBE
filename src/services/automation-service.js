@@ -35,6 +35,7 @@ export async function handleAutomationTriggerService(payload) {
     itemId,
     logConfigRes.data.peopleColumnId
   );
+  // THIS ERROR NEEDS TO BE HANDLED SERVER SIDE CORRECLTY WITH NOTIFICATIONS ETC
   if (!assignedItemUsers.data) {
     return { message: "No user assigned", status: 404, data: [] };
   }
@@ -58,6 +59,7 @@ export async function handleAutomationTriggerService(payload) {
   if (
     createLog === null &&
     logConfigRes.data.startDate !== null &&
+    // Possibly uneeded condition
     assignedItemUsers.data !== null
   ) {
     const notificationText = `Item-${itemId}'s status has changed to neither a start or end label. This item is still tracking time, please be aware this automation is still active and tracking!`;
@@ -192,7 +194,7 @@ export async function fetchUsers(itemId, peopleColumnId) {
   } catch (error) {
     console.error(error);
     return {
-      message: "Error fetching and processing updates",
+      message: "Error fetching users",
       status: 500,
       data: error,
     };

@@ -102,6 +102,8 @@ const LogsTable = pgTable("logs", {
     null
   ),
   currency: text("currency").default(null),
+  // 0: Not yet submitted, 1: Submitted not yet dis/approved, 2: Submitted and approved, 3: Submitted but disapproved
+  status: integer("status").default(0).notNull(),
 });
 
 const logsRelations = relations(LogsTable, ({ many }) => ({
