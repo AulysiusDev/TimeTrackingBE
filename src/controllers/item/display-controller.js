@@ -1,12 +1,13 @@
-import schemas from "../schema/schemas.js";
-import { deleteByIds } from "../services/crud.js";
+import schemas from "../../schema/schemas.js";
+import { deleteByIds } from "../../services/crud.js";
 import {
   addUsernames,
   fetchLogs,
   sumHours,
-} from "../services/display-service.js";
+} from "../../services/item/display-service.js";
 
 export async function fetchHours(req, res) {
+  console.log("Fetching");
   // Define variables
   const itemId = req.body.itemId;
   let itemsLogs = [];

@@ -18,9 +18,28 @@ export const authorizeRequest = (req, res, next) => {
       signingSecret
     );
     req.session = { accountId, userId, backToUrl, shortLivedToken };
+    console.log({ session: req.session });
     next();
   } catch (err) {
     logger.error(err);
     res.status(500).json({ error: "Not authenticated" });
   }
+};
+
+export const authorizeRegularRequest = (req, res, next) => {
+  const authHeader = req.headers.authorization;
+  const token = authHeader && authHeader.split(" ")[1];
+
+  if (!token) {
+    return res.sendStatus(401);
+  }
+
+  jwt.verify(token, process.env.CLIENT_SECRET, (err, data) => {
+    if (err) {
+      console.error(err);
+      return res.sendStatus(403);
+    }
+    req.sessionData = data;
+    next();
+  });
 };

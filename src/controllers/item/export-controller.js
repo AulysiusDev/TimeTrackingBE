@@ -2,7 +2,7 @@ import {
   configTimeStamps,
   convertJsonToCsv,
   convertJsonToXLSX,
-} from "../services/export-service.js";
+} from "../../services/item/export-service.js";
 
 export async function generateXlsx(req, res) {
   let { logs } = req.body;

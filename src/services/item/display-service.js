@@ -1,6 +1,6 @@
 import initMondayClient from "monday-sdk-js";
-import { findById } from "./crud.js";
-import schemas from "../schema/schemas.js";
+import { findById } from "../crud.js";
+import schemas from "../../schema/schemas.js";
 
 export async function fetchLogs(itemId) {
   let itemsLogs = [];

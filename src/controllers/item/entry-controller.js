@@ -1,4 +1,4 @@
-import { createTimeEntryService } from "../services/entry-service.js";
+import { createTimeEntryService } from "../../services/item/entry-service.js";
 
 export async function createTimeEntry(req, res) {
   try {

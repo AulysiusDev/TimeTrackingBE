@@ -1,7 +1,7 @@
-import { validateLogConfig } from "../db/validators.js";
-import schema from "../schema/schemas.js";
-import schemas from "../schema/schemas.js";
-import { createEntry, findById } from "./crud.js";
+import { validateLogConfig } from "../../db/validators.js";
+import schema from "../../schema/schemas.js";
+import schemas from "../../schema/schemas.js";
+import { createEntry, findById } from "../crud.js";
 import initMondayClient from "monday-sdk-js";
 import { addUsernames } from "./display-service.js";
 

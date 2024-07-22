@@ -1,10 +1,10 @@
-import schema, { LogConfigTable } from "../schema/schemas.js";
-import { updateField } from "./crud.js";
-import { getDrizzleDbClient } from "./db-client.js";
+import schema, { LogConfigTable } from "../../schema/schemas.js";
+import { updateField } from "../crud.js";
+import { getDrizzleDbClient } from "../db-client.js";
 import { and, eq, isNull, or } from "drizzle-orm";
 import initMondayClient from "monday-sdk-js";
 import { createTimeEntryService } from "./entry-service.js";
-import { calculateHours, createDatesArr } from "../helpers.js";
+import { calculateHours, createDatesArr } from "../../helpers.js";
 
 export async function handleAutomationTriggerService(payload) {
   const { previousColumnValue, columnValue, boardId, itemId, columnId } =

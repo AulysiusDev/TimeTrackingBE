@@ -1,5 +1,5 @@
 // controllers/automationController.js
-import { handleAutomationTriggerService } from "../services/automation-service.js";
+import { handleAutomationTriggerService } from "../../services/item/automation-service.js";
 
 export async function handleAutomationTrigger(req, res) {
   console.log("Automation triggered");

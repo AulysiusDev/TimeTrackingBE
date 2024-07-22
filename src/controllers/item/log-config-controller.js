@@ -1,14 +1,15 @@
-import schemas from "../schema/schemas.js";
-import { updateField } from "../services/crud.js";
+import schemas from "../../schema/schemas.js";
+import { updateField } from "../../services/crud.js";
+
 import {
   validateAndCreateItem,
   validateAndCreateUsers,
-} from "../services/entry-service.js";
+} from "../../services/item/entry-service.js";
 import {
   fetchLogConfigs,
   formatLogConfigs,
   validateAndCreateLogConfig,
-} from "../services/log-config-service.js";
+} from "../../services/item/log-config-service.js";
 
 export async function getLogConfig(req, res) {
   const { itemId, boardId } = req.body;
