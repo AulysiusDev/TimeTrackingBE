@@ -18,7 +18,6 @@ export const getSecret = (secretKey, options = {}) => {
 };
 
 export function createDatesArr(logDetails) {
-  console.log({ logDetails });
   let datesArr = [];
   const startDate = new Date(logDetails.startDate);
   const endDate = new Date(logDetails.endDate);

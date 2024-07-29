@@ -15,6 +15,7 @@ const UsersTable = pgTable("users", {
   startTime: integer("start_time"),
   endTime: integer("end_time"),
   days: text("days_array"),
+  team: text("team"),
   currency: text("currency").default("USD"),
   createdAt: timestamp("created_at").defaultNow(),
 });

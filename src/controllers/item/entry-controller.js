@@ -1,6 +1,7 @@
 import { createTimeEntryService } from "../../services/item/entry-service.js";
 
 export async function createTimeEntry(req, res) {
+  console.log({ body: req.body });
   try {
     const result = await createTimeEntryService(req.body);
 
