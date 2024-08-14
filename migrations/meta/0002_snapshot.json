@@ -1,6 +1,6 @@
 {
-  "id": "e48f6e38-dea9-4d2a-a4ce-f957887de039",
-  "prevId": "00000000-0000-0000-0000-000000000000",
+  "id": "70e44e75-9342-414a-b949-c871addad608",
+  "prevId": "8ebf3582-3bd2-4218-a9ff-deb922d5e779",
   "version": "5",
   "dialect": "pg",
   "tables": {
@@ -32,8 +32,14 @@
           "primaryKey": false,
           "notNull": true
         },
-        "target_id": {
-          "name": "target_id",
+        "group_id": {
+          "name": "group_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "item_id": {
+          "name": "item_id",
           "type": "integer",
           "primaryKey": false,
           "notNull": false
@@ -241,8 +247,8 @@
           "primaryKey": false,
           "notNull": false
         },
-        "start_date": {
-          "name": "start_date",
+        "date": {
+          "name": "date",
           "type": "timestamp",
           "primaryKey": false,
           "notNull": true,

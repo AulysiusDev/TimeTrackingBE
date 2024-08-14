@@ -35,9 +35,14 @@ const LogConfigTable = pgTable("logconfig", {
   userId: integer("user_id")
     .notNull()
     .references(() => UsersTable.id),
-  workspaceId: integer("workspace_id").notNull(),
+  itemId: text("item_id"),
+  subitemId: text("subitem_id"),
+  // Automation has to set on a certian board with specific status/people columns,
+  // ...unlike creating logs etc. Thus board id is required
+  //
   boardId: text("board_id").notNull(),
-  targetId: integer("target_id"),
+  groupId: text("group_id"),
+  workspaceId: text("workspace_id").notNull(),
   // This gets set when the automation gets started, and it gets cleared when automation is stopped
   startDate: timestamp("start_date").defaultNow(),
   createdAt: timestamp("created_at").defaultNow(),
@@ -89,11 +94,12 @@ const LogsTable = pgTable("logs", {
     .notNull()
     .references(() => UsersTable.id),
   itemId: text("item_id"),
+  subitemId: text("subitem_id"),
   boardId: text("board_id"),
   groupId: text("group_id"),
   workspaceId: text("workspace_id").notNull(),
   targetName: text("target_name"),
-  date: timestamp("start_date").defaultNow().notNull(),
+  date: timestamp("date").defaultNow().notNull(),
   totalHours: numeric("total_hours", { precision: 8, scale: 2 }),
   billableHours: numeric("billable_hours", { precision: 8, scale: 2 }),
   note: text("note"),

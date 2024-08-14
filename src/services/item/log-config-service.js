@@ -1,7 +1,7 @@
 import { validateLogConfig } from "../../db/validators.js";
 import schema from "../../schema/schemas.js";
 import schemas from "../../schema/schemas.js";
-import { createEntry, findById } from "../crud.js";
+import { createEntries, findById } from "../crud.js";
 import initMondayClient from "monday-sdk-js";
 import { addUsernames } from "./display-service.js";
 
@@ -43,7 +43,7 @@ export async function validateAndCreateLogConfig(logConfigObj) {
     startLabels: JSON.stringify(data.startLabels),
     endLabels: JSON.stringify(data.endLabels),
   };
-  const createRes = await createEntry(schema.LogConfigTable, newConfigObj);
+  const createRes = await createEntries(schema.LogConfigTable, newConfigObj);
   return createRes;
 }
 

@@ -1,5 +1,5 @@
 import { UsersTable } from "../schema/schemas.js";
-import { createEntry, findById, updateField } from "../services/crud.js";
+import { createEntries, findById, updateField } from "../services/crud.js";
 import jwt from "jsonwebtoken";
 import initMondayClient from "monday-sdk-js";
 
@@ -105,7 +105,7 @@ export const fetchAuthToken = async (userId) => {
       // 404, no user found
     } else if (authRes.status === 404) {
       // Create user
-      const createUserRes = await createEntry(UsersTable, {
+      const createUserRes = await createEntries(UsersTable, {
         id: parseInt(userId),
       });
       // Error creating user
@@ -173,7 +173,7 @@ const fetchSaveAccessKey = async (code, userId) => {
       // 404, no user found
     } else if (authRes.status === 404) {
       // Create user with access key
-      const createUserRes = await createEntry(UsersTable, {
+      const createUserRes = await createEntries(UsersTable, {
         id: parseInt(userId),
         accessKey: token.access_token,
       });

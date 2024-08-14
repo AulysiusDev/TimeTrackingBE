@@ -4,7 +4,7 @@ import { updateField } from "../../services/crud.js";
 import {
   validateAndCreateItem,
   validateAndCreateUsers,
-} from "../../services/item/entry-service.js";
+} from "../../services/common/create-entries-service.js";
 import {
   fetchLogConfigs,
   formatLogConfigs,

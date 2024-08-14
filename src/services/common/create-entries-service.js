@@ -5,11 +5,11 @@ import {
 } from "../../db/validators.js";
 import { createDatesArray, validateDatesArray } from "../../helpers.js";
 import schemas from "../../schema/schemas.js";
-import { createEntry, findById, findInArray, updateField } from "../crud.js";
+import { createEntries, findById, findInArray, updateField } from "../crud.js";
 import { findUsernames, sendNotifications } from "../monday-service.js";
 
-export async function createTimeEntryService(entryData) {
-  console.dir({ entryData }, { depth: null });
+// Root function, creates time logs from input data, across a period and for multiple users if selected
+export async function createTimeEntriesService(entryData) {
   if (!entryData?.sessionToken) {
     return {
       message:
@@ -19,9 +19,9 @@ export async function createTimeEntryService(entryData) {
     };
   }
   // Validate user objects and create them in db if not already, this is so rate crads can be created etc.
-  const validatedUsers = await validateAndCreateUsers(entryData);
-  if (validatedUsers.status === 500 || validatedUsers.status === 400) {
-    return { status: validatedUsers.status, ...validatedUsers };
+  const validatedUsersRes = await validateAndCreateUsers(entryData);
+  if (validatedUsersRes.status === 500 || validatedUsersRes.status === 400) {
+    return { status: validatedUsersRes.status, ...validatedUsersRes };
   }
   // Find creators access key, or use oAuth if not provided yet
   const creatorRes = await findById(
@@ -34,7 +34,11 @@ export async function createTimeEntryService(entryData) {
   }
   const accessKey = creatorRes.data[0]?.accessKey;
   if (!accessKey) {
-    // Send to oAuth
+    return {
+      message: "Unauthorized",
+      status: 401,
+      data: { id: entryData.user.creatorId },
+    };
   }
 
   const updateWithAccessTokenRes = await updateField(
@@ -44,6 +48,9 @@ export async function createTimeEntryService(entryData) {
     { accessKey: accessKey },
     entryData.user.creatorId
   );
+  if (updateWithAccessTokenRes.status === 500) {
+    return updateWithAccessTokenRes;
+  }
 
   // custom days or monday to friday (1-5 index)
   const daysArr = entryData.schedule.custom
@@ -68,6 +75,7 @@ export async function createTimeEntryService(entryData) {
     entryData.log.endDate,
     daysArr
   );
+  console.log({ dates });
   // Date array validation
   if (!validateDatesArray(dates)) {
     return {
@@ -78,6 +86,7 @@ export async function createTimeEntryService(entryData) {
     };
   }
   const createLogsRes = await validateAndCreateLogs(entryData, dates);
+  console.log({ createLogsRes });
   // Return error for user if error
   if (createLogsRes.status === 500) {
     return {
@@ -106,11 +115,32 @@ export async function createTimeEntryService(entryData) {
 
   // WHY IS THIS HERE?!
   const usernamesRes = await findUsernames(entryData.user.creatorId);
+  console.dir({ usernamesRes }, { depth: null });
+
+  if (usernamesRes.status !== 200) {
+    return usernamesRes;
+  }
 
   // Send notification informing user of time log creation
   if (createLogsRes.data.length > 0) {
     const message = `${createLogsRes.data.length} time logs were created for you ${dateString}, by ${entryData.user.creatorId} `;
-    await sendNotifications(entryData.user.ids, target, message);
+    const notificationsRes = await sendNotifications(
+      entryData.user.ids,
+      target,
+      message
+    );
+    console.log({ notificationsRes });
+    if (notificationsRes.status !== 200) {
+      const errorMessage = `There was an error creating  notifications for successful logs. Status: ${notificationsRes.status}; Message: ${notificationsRes.message}.`;
+      const errorNotificationRes = await sendNotifications(
+        entryData.user.creatorId,
+        target,
+        errorMessage
+      );
+      if (errorNotificationRes.status !== 200) {
+        return errorNotificationRes;
+      }
+    }
   }
 
   return {
@@ -190,7 +220,7 @@ export async function validateAndCreateUsers(entryData) {
         }
         // Create users which are not present in db - UsersTable
         if (usersToCreate.length) {
-          const res = await createEntry(schemas.UsersTable, usersToCreate);
+          const res = await createEntries(schemas.UsersTable, usersToCreate);
           if (res.status === 500) {
             return {
               message: "There was an error creating user entries",
@@ -247,7 +277,7 @@ export async function validateAndCreateLogs(entryData, dates) {
 
   try {
     // Create entries in db
-    const newLogEntries = await createEntry(schemas.LogsTable, validatedLogs);
+    const newLogEntries = await createEntries(schemas.LogsTable, validatedLogs);
     return newLogEntries;
   } catch (error) {
     console.error(error);
@@ -265,10 +295,11 @@ export const createLogsArray = (entryData, dates) => {
     dates.map((date) => {
       const logObj = {
         userId: parseInt(userId.id),
-        itemId: parseFloat(entryData.item.id) || null,
-        boardId: parseFloat(entryData.item.boardId) || null,
-        groupId: parseFloat(entryData.item.groupId) || null,
-        workspaceId: parseFloat(entryData.item.workspaceId) || null,
+        itemId: JSON.stringify(entryData.item.id) || null,
+        subitemId: JSON.stringify(entryData.item.subitemId) || null,
+        boardId: JSON.stringify(entryData.item.boardId) || null,
+        groupId: JSON.stringify(entryData.item.groupId) || null,
+        workspaceId: JSON.stringify(entryData.item.workspaceId) || null,
         // Need to figure this part out, would be nice to have to reference but not urgent - targetName
         targetName: JSON.stringify(entryData.item.targeName) || null,
         date: new Date(date),
@@ -337,7 +368,7 @@ export async function validateAndCreateItem(entryData) {
   }
   // Create entry in ItemsTable
   try {
-    const newItem = await createEntry(schemas.ItemsTable, data);
+    const newItem = await createEntries(schemas.ItemsTable, data);
     return {
       message: "New item entry created and data validated.",
       data: newItem.data,

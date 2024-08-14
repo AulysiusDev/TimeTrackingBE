@@ -1,6 +1,6 @@
 {
-  "id": "5fa39ac7-1bb7-4313-9581-579496a6cc0f",
-  "prevId": "d804909a-56d7-4d4e-91f8-3e8777a12e28",
+  "id": "8ebf3582-3bd2-4218-a9ff-deb922d5e779",
+  "prevId": "e48f6e38-dea9-4d2a-a4ce-f957887de039",
   "version": "5",
   "dialect": "pg",
   "tables": {
@@ -241,8 +241,8 @@
           "primaryKey": false,
           "notNull": false
         },
-        "start_date": {
-          "name": "start_date",
+        "date": {
+          "name": "date",
           "type": "timestamp",
           "primaryKey": false,
           "notNull": true,

@@ -51,6 +51,7 @@ CREATE TABLE IF NOT EXISTS "users" (
 	"days_array" text,
 	"team" text,
 	"currency" text DEFAULT 'USD',
+	"access_key" text,
 	"created_at" timestamp DEFAULT now()
 );
 --> statement-breakpoint

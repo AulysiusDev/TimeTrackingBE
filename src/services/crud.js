@@ -1,7 +1,7 @@
 import { getDrizzleDbClient } from "./db-client.js";
 import { eq, inArray } from "drizzle-orm";
 
-export async function createEntry(schema, value) {
+export async function createEntries(schema, value) {
   try {
     const db = await getDrizzleDbClient();
     const results = await db.insert(schema).values(value).returning();

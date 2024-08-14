@@ -59,9 +59,10 @@ export async function validateLog(logData) {
   const log = z.object({
     userId: z.number(),
     itemId: z.number().nullable(),
-    boardId: z.number().nullable(),
-    groupId: z.number().nullable(),
-    workspaceId: z.number(),
+    subitemId: z.string().nullable(),
+    boardId: z.string().nullable(),
+    groupId: z.string().nullable(),
+    workspaceId: z.string(),
     targetName: z.string().nullable(),
     date: z.date(),
     totalHours: z.number(),

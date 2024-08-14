@@ -1,5 +1,8 @@
 import express from "express";
-import { createTimeEntry } from "../controllers/item/entry-controller.js";
+import {
+  createTimeEntriesController,
+  fetchTimeEntriesController,
+} from "../controllers/common/entries-controller.js";
 import {
   createLogConfigEntry,
   getLogConfig,
@@ -19,7 +22,6 @@ import {
   subscribe,
   unsubscribe,
 } from "../controllers/item/automation-controller.js";
-import { fetchEntries } from "../controllers/object/entries-controller.js";
 import { createJWT, getAuthKey, saveAuthKey } from "../auth/oauth.js";
 
 const router = express.Router();
@@ -29,12 +31,25 @@ const router = express.Router();
 router.post("/oauth/fetch-auth-key", authorizeRegularRequest, getAuthKey);
 router.get("/oauth/callback", saveAuthKey);
 router.post("/create-jwt", authorizeRegularRequest, createJWT);
+
+// **Logs
+// Create logs
+router.post(
+  "/create-time-entry",
+  authorizeRegularRequest,
+  createTimeEntriesController
+);
+// Fetch logs for display
+router.post(
+  "/entries/fetch-data",
+  // authorizeRegularRequest,
+  fetchTimeEntriesController
+);
+
 // Item routes
 // router.post("/start-stop-automation", startStopAutomation);
 // router.post("/fetch-item-settings", getLogConfig);
 // router.post("/create-log-config", createLogConfigEntry);
-router.post("/create-time-entry", authorizeRegularRequest, createTimeEntry);
-// router.post("/fetch-hours", fetchHours);
 // router.delete("/delete-entries", deleteEntries);
 // router.post("/generate-xlsx", generateXlsx);
 // router.post("/generate-csv", generateCsv);

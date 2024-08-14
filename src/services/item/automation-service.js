@@ -3,7 +3,7 @@ import { updateField } from "../crud.js";
 import { getDrizzleDbClient } from "../db-client.js";
 import { and, eq, isNull, or } from "drizzle-orm";
 import initMondayClient from "monday-sdk-js";
-import { createTimeEntryService } from "./entry-service.js";
+import { createTimeEntriesService } from "../common/create-entries-service.js";
 import { calculateHours, createDatesArray } from "../../helpers.js";
 import { sendNotifications } from "../monday-service.js";
 
@@ -82,7 +82,7 @@ export async function handleAutomationTriggerService(payload) {
       const hours = parseFloat(
         calculateHours(logConfigRes.data, date).toFixed(2)
       );
-      const response = await createTimeEntryService({
+      const response = await createTimeEntriesService({
         boardId: boardId,
         workspaceId: logConfigRes.data.workspaceId,
         date: new Date(date),
