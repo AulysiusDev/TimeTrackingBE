@@ -17,25 +17,27 @@ const UsersTable = pgTable("users", {
   days: text("days_array"),
   team: text("team"),
   currency: text("currency").default("USD"),
+  accessKey: text("access_key"),
   createdAt: timestamp("created_at").defaultNow(),
 });
 
-const ItemsTable = pgTable("items", {
-  id: serial("id").primaryKey(),
-  isSubitem: boolean("is_subitem").default(false),
-  parentItemId: integer("parent_item_id"),
-  boardId: text("board_id").notNull(),
-  workspaceId: text("workspace_id").notNull(),
-  createdAt: timestamp("created_at").defaultNow(),
-});
+// const ItemsTable = pgTable("items", {
+//   id: serial("id").primaryKey(),
+//   isSubitem: boolean("is_subitem").default(false),
+//   parentItemId: integer("parent_item_id"),
+//   boardId: text("board_id").notNull(),
+//   workspaceId: text("workspace_id").notNull(),
+//   createdAt: timestamp("created_at").defaultNow(),
+// });
 
 const LogConfigTable = pgTable("logconfig", {
   id: serial("id").primaryKey(),
-  workspaceId: integer("workspace_id"),
   userId: integer("user_id")
     .notNull()
     .references(() => UsersTable.id),
-  itemId: integer("item_id").references(() => ItemsTable.id),
+  workspaceId: integer("workspace_id").notNull(),
+  boardId: text("board_id").notNull(),
+  targetId: integer("target_id"),
   // This gets set when the automation gets started, and it gets cleared when automation is stopped
   startDate: timestamp("start_date").defaultNow(),
   createdAt: timestamp("created_at").defaultNow(),
@@ -65,7 +67,6 @@ const LogConfigTable = pgTable("logconfig", {
   // Can be set, can be null, anc can use rate card instead
   ratePerHour: numeric("rate_per_hour", { precision: 8, scale: 2 }),
   currency: text("currency").default("USD"),
-  boardId: text("board_id").notNull(),
   active: boolean("active").default(false),
 });
 
@@ -75,25 +76,23 @@ const logsConfigRelations = relations(LogConfigTable, ({ one }) => ({
     fields: [LogConfigTable.userId],
     references: [UsersTable.id],
   }),
-  item: one(ItemsTable, {
-    fields: [LogConfigTable.itemId],
-    references: [ItemsTable.id],
-  }),
   rateCard: one(UsersTable, {
     relationName: "rateCard",
     fields: [LogConfigTable.rateCardId],
     references: [UsersTable.id],
   }),
 }));
-
+// Can create logs for items, boards or workspaces
 const LogsTable = pgTable("logs", {
   id: serial("id").primaryKey(),
   userId: integer("user_id")
     .notNull()
     .references(() => UsersTable.id),
-  itemId: integer("item_id")
-    .notNull()
-    .references(() => ItemsTable.id),
+  itemId: text("item_id"),
+  boardId: text("board_id"),
+  groupId: text("group_id"),
+  workspaceId: text("workspace_id").notNull(),
+  targetName: text("target_name"),
   date: timestamp("start_date").defaultNow().notNull(),
   totalHours: numeric("total_hours", { precision: 8, scale: 2 }),
   billableHours: numeric("billable_hours", { precision: 8, scale: 2 }),
@@ -109,12 +108,10 @@ const LogsTable = pgTable("logs", {
 
 const logsRelations = relations(LogsTable, ({ many }) => ({
   users: many(UsersTable),
-  items: many(ItemsTable),
 }));
 
 export {
   UsersTable,
-  ItemsTable,
   LogConfigTable,
   logsConfigRelations,
   LogsTable,
@@ -122,7 +119,6 @@ export {
 };
 const schema = {
   UsersTable,
-  ItemsTable,
   LogConfigTable,
   logsConfigRelations,
   LogsTable,

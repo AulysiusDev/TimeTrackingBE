@@ -1,57 +1,9 @@
 {
-  "id": "c48f8c41-fcf6-4980-a53f-96935cff18f6",
-  "prevId": "529c394d-d7e8-482c-bc1b-5e82f945bbb1",
+  "id": "5fa39ac7-1bb7-4313-9581-579496a6cc0f",
+  "prevId": "d804909a-56d7-4d4e-91f8-3e8777a12e28",
   "version": "5",
   "dialect": "pg",
   "tables": {
-    "items": {
-      "name": "items",
-      "schema": "",
-      "columns": {
-        "id": {
-          "name": "id",
-          "type": "serial",
-          "primaryKey": true,
-          "notNull": true
-        },
-        "is_subitem": {
-          "name": "is_subitem",
-          "type": "boolean",
-          "primaryKey": false,
-          "notNull": false,
-          "default": false
-        },
-        "parent_item_id": {
-          "name": "parent_item_id",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "board_id": {
-          "name": "board_id",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "workspace_id": {
-          "name": "workspace_id",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "created_at": {
-          "name": "created_at",
-          "type": "timestamp",
-          "primaryKey": false,
-          "notNull": false,
-          "default": "now()"
-        }
-      },
-      "indexes": {},
-      "foreignKeys": {},
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {}
-    },
     "logconfig": {
       "name": "logconfig",
       "schema": "",
@@ -68,8 +20,20 @@
           "primaryKey": false,
           "notNull": true
         },
-        "item_id": {
-          "name": "item_id",
+        "workspace_id": {
+          "name": "workspace_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "board_id": {
+          "name": "board_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "target_id": {
+          "name": "target_id",
           "type": "integer",
           "primaryKey": false,
           "notNull": false
@@ -191,12 +155,6 @@
           "notNull": false,
           "default": "'USD'"
         },
-        "board_id": {
-          "name": "board_id",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true
-        },
         "active": {
           "name": "active",
           "type": "boolean",
@@ -213,19 +171,6 @@
           "tableTo": "users",
           "columnsFrom": [
             "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
-        },
-        "logconfig_item_id_items_id_fk": {
-          "name": "logconfig_item_id_items_id_fk",
-          "tableFrom": "logconfig",
-          "tableTo": "items",
-          "columnsFrom": [
-            "item_id"
           ],
           "columnsTo": [
             "id"
@@ -268,9 +213,33 @@
         },
         "item_id": {
           "name": "item_id",
-          "type": "integer",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "board_id": {
+          "name": "board_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "group_id": {
+          "name": "group_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "workspace_id": {
+          "name": "workspace_id",
+          "type": "text",
           "primaryKey": false,
           "notNull": true
+        },
+        "target_name": {
+          "name": "target_name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
         },
         "start_date": {
           "name": "start_date",
@@ -317,6 +286,13 @@
           "primaryKey": false,
           "notNull": false,
           "default": null
+        },
+        "status": {
+          "name": "status",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "default": 0
         }
       },
       "indexes": {},
@@ -327,19 +303,6 @@
           "tableTo": "users",
           "columnsFrom": [
             "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
-        },
-        "logs_item_id_items_id_fk": {
-          "name": "logs_item_id_items_id_fk",
-          "tableFrom": "logs",
-          "tableTo": "items",
-          "columnsFrom": [
-            "item_id"
           ],
           "columnsTo": [
             "id"
@@ -386,12 +349,24 @@
           "primaryKey": false,
           "notNull": false
         },
+        "team": {
+          "name": "team",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
         "currency": {
           "name": "currency",
           "type": "text",
           "primaryKey": false,
           "notNull": false,
           "default": "'USD'"
+        },
+        "access_key": {
+          "name": "access_key",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
         },
         "created_at": {
           "name": "created_at",

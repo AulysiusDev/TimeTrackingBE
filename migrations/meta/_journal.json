@@ -5,36 +5,15 @@
     {
       "idx": 0,
       "version": "5",
-      "when": 1717513014647,
-      "tag": "0000_kind_onslaught",
+      "when": 1722424220338,
+      "tag": "0000_natural_prism",
       "breakpoints": true
     },
     {
       "idx": 1,
       "version": "5",
-      "when": 1718192966016,
-      "tag": "0001_pretty_surge",
-      "breakpoints": true
-    },
-    {
-      "idx": 2,
-      "version": "5",
-      "when": 1718274322843,
-      "tag": "0002_odd_black_bird",
-      "breakpoints": true
-    },
-    {
-      "idx": 3,
-      "version": "5",
-      "when": 1721211507446,
-      "tag": "0003_funny_shape",
-      "breakpoints": true
-    },
-    {
-      "idx": 4,
-      "version": "5",
-      "when": 1721834537236,
-      "tag": "0004_fearless_argent",
+      "when": 1722519129577,
+      "tag": "0001_secret_korath",
       "breakpoints": true
     }
   ]

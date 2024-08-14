@@ -4,7 +4,8 @@ import { getDrizzleDbClient } from "../db-client.js";
 import { and, eq, isNull, or } from "drizzle-orm";
 import initMondayClient from "monday-sdk-js";
 import { createTimeEntryService } from "./entry-service.js";
-import { calculateHours, createDatesArr } from "../../helpers.js";
+import { calculateHours, createDatesArray } from "../../helpers.js";
+import { sendNotifications } from "../monday-service.js";
 
 export async function handleAutomationTriggerService(payload) {
   const { previousColumnValue, columnValue, boardId, itemId, columnId } =
@@ -75,7 +76,7 @@ export async function handleAutomationTriggerService(payload) {
     logConfigRes.data.endDate = changedAt.data
       ? new Date(changedAt.data)
       : new Date(Date.now());
-    const datesArr = createDatesArr(logConfigRes.data);
+    const datesArr = createDatesArray(logConfigRes.data);
     console.log({ datesArr });
     for (const date of datesArr) {
       const hours = parseFloat(
@@ -200,42 +201,7 @@ export async function fetchUsers(itemId, peopleColumnId) {
     };
   }
 }
-// Send s a notification to a user. (target is the id of the thing updating about)
-export async function sendNotifications(userIds, target, text) {
-  const monday = initMondayClient();
-  monday.setToken(process.env.MONDAY_API_TOKEN);
-  try {
-    for (const userId of userIds) {
-      const query = `
-      mutation($userId: ID!, $targetId: ID!, $text: String!, $targetType: NotificationTargetType!) {
-      create_notification (user_id: $userId, target_id: $targetId, text: $text, target_type: $targetType) {
-      text
-      }
-    }
-      `;
-      const variables = {
-        targetId: target,
-        userId: userId,
-        text: text,
-        targetType: "Project",
-      };
-      const res = await monday.api(query, { variables });
-      console.dir({ res }, { depth: null });
-    }
-    return {
-      message: "Success sending notifications",
-      status: 200,
-      data: "Success",
-    };
-  } catch (error) {
-    console.error(error);
-    return {
-      message: "Error sending notifications",
-      status: 500,
-      data: error,
-    };
-  }
-}
+
 async function findCreatedAtStatusChange(
   boardId,
   columnId,

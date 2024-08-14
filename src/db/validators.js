@@ -1,6 +1,7 @@
 import { z } from "zod";
 
 export async function validateUser(userObj) {
+  console.log(userObj);
   const user = z.object({
     id: z.number(),
     ratePerHour: z.number().nullable(),
@@ -57,13 +58,18 @@ export async function validateItem(itemData) {
 export async function validateLog(logData) {
   const log = z.object({
     userId: z.number(),
-    itemId: z.number(),
+    itemId: z.number().nullable(),
+    boardId: z.number().nullable(),
+    groupId: z.number().nullable(),
+    workspaceId: z.number(),
+    targetName: z.string().nullable(),
     date: z.date(),
     totalHours: z.number(),
     billableHours: z.number(),
     note: z.string(),
     ratePerHour: z.number().nullable(),
     currency: z.string().nullable(),
+    status: z.number(),
   });
   let hasError;
   let validLogData = {};

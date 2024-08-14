@@ -1,4 +1,5 @@
 import { EnvironmentVariablesManager } from "@mondaycom/apps-sdk";
+import jwt from "jsonwebtoken";
 
 const secretManager = new EnvironmentVariablesManager();
 const DEVELOPMENT_ENV = "development";
@@ -17,56 +18,58 @@ export const getSecret = (secretKey, options = {}) => {
   return secret;
 };
 
-export function createDatesArr(logDetails) {
-  let datesArr = [];
-  const startDate = new Date(logDetails.startDate);
-  const endDate = new Date(logDetails.endDate);
+export const verifySessionToken = (sessionToken) => {
+  const decodedToken = jwt.verify(sessionToken, process.env.CLIENT_SECRET);
+  return decodedToken;
+};
 
+// Create array of dates to create logs from using start and end dates
+export const createDatesArray = (start, end, days = []) => {
+  // Same day
+  const startDate = new Date(start);
+  const endDate = new Date(end);
   if (
-    startDate.toISOString().split("T")[0] ===
-    endDate.toISOString().split("T")[0]
+    !end ||
+    !validateDatesArray([new Date(end)]) ||
+    startDate.getDate() === endDate.getDate()
   ) {
-    datesArr.push(logDetails.startDate);
-  } else {
-    let customDaysArr = [];
-    try {
-      customDaysArr = JSON.parse(logDetails.customDays);
-    } catch (e) {
-      customDaysArr = [];
-    }
-
-    datesArr = createDaysArr(
-      logDetails.startDate,
-      logDetails.endDate,
-      customDaysArr
-    );
+    console.log("same day");
+    return [startDate];
   }
-  return datesArr;
-}
-
-function createDaysArr(startDateStr, endDateStr, customDaysArr) {
-  const startDate = new Date(startDateStr);
-  const endDate = new Date(endDateStr);
-  const daysArr = [];
-
+  // Multi day
+  if (!days.length) {
+    return [];
+  }
+  const datesArr = [];
   for (
-    let currentDate = new Date(startDate);
+    const currentDate = startDate;
     currentDate <= endDate;
     currentDate.setDate(currentDate.getDate() + 1)
   ) {
-    if (customDaysArr && customDaysArr.length) {
+    if (days && days.length) {
       const dayOfWeek = currentDate.getDay();
-      if (customDaysArr.includes(dayOfWeek)) {
-        daysArr.push(currentDate.toISOString().split("T")[0]);
+      if (days.includes(dayOfWeek)) {
+        datesArr.push(currentDate.toISOString().split("T")[0]);
       }
     } else {
       if (currentDate.getDay() >= 1 && currentDate.getDay() <= 5) {
-        daysArr.push(new Date(currentDate).toISOString().split("T")[0]);
+        datesArr.push(new Date(currentDate).toISOString().split("T")[0]);
       }
     }
   }
-  return daysArr;
-}
+  return datesArr;
+};
+
+export const validateDatesArray = (dates) => {
+  return (
+    Array.isArray(dates) &&
+    dates.length &&
+    dates.every((dateStr) => {
+      const date = new Date(dateStr);
+      return date instanceof Date && !isNaN(date);
+    })
+  );
+};
 
 export function calculateHours(logConfig, current) {
   console.log({ logConfig });

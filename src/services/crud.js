@@ -6,36 +6,86 @@ export async function createEntry(schema, value) {
     const db = await getDrizzleDbClient();
     const results = await db.insert(schema).values(value).returning();
     return {
-      message: "Entry created successfully",
+      message: `${results.length} entr${
+        results.length > 1 ? "ies" : "y"
+      } created successfully`,
       status: 201,
-      data: results[0],
+      data: results,
     };
   } catch (error) {
     console.error(error);
-    return { message: "Failed to create entry", status: 500, data: null };
+    return {
+      message: error.message || "Error creating time logs",
+      status: error.status || 500,
+      data: error,
+    };
   }
 }
 
 export async function findById(schema, schemaId, id) {
   try {
     const db = await getDrizzleDbClient();
-    const results = await db.select().from(schema).where(eq(schemaId, id));
+    const results = await db
+      .select()
+      .from(schema)
+      .where(eq(schemaId, parseInt(id)));
     if (results.length > 0) {
       return {
-        message: "Entry/s fetched successfully",
+        message: `${results.length} entr${
+          results.length > 1 ? "ies" : "y"
+        } fetched successfully.`,
         status: 200,
         data: results,
       };
     } else {
       return {
-        message: "No entries found matching this id",
+        message: "No entries found matching this id.",
         status: 404,
         data: [],
       };
     }
   } catch (error) {
     console.error(error);
-    return { message: "Error fetching entry", status: 500, data: null };
+    return {
+      message: error.message || "Error fetching entries",
+      status: error.status || 500,
+      data: error,
+    };
+  }
+}
+
+export async function findInArray(schema, schemaId, array) {
+  if (array.length === 0) {
+    return { message: "No ids provided for search.", status: 400, data: [] };
+  }
+  try {
+    const db = await getDrizzleDbClient();
+    const results = await db
+      .select()
+      .from(schema)
+      .where(inArray(schemaId, array));
+    if (results.length > 0) {
+      return {
+        message: `${results.length > 1 ? "s" : ""} entr${
+          results.length > 1 ? "ies" : "y"
+        } fetched successfully`,
+        status: 200,
+        data: results,
+      };
+    } else {
+      return {
+        message: "No entries found matching these ids.",
+        status: 404,
+        data: [],
+      };
+    }
+  } catch (error) {
+    console.error(error);
+    return {
+      message: error?.message || "Error fetching users from ids",
+      status: error?.status || 500,
+      data: error,
+    };
   }
 }
 
@@ -52,10 +102,22 @@ export async function deleteByIds(schema, schemaId, ids) {
     return { message: "Deleted successfully", status: 200, data: res };
   } catch (error) {
     console.error("Error deleting logs:", error);
-    return { message: "Error deleting logs", status: 500, data: null };
+    return {
+      message: error?.message || "Error deleting logs",
+      status: error?.status || 500,
+      data: error,
+    };
   }
 }
 
+// **Example input for updateField**
+// updateField(
+//   schemas.LogConfigTable,
+//   schemas.LogConfigTable.id,
+//   schemas.LogConfigTable.startDate,
+//   { startDate: null },
+//   logId
+// );
 export async function updateField(
   schema,
   schemaId,
@@ -74,8 +136,8 @@ export async function updateField(
   } catch (error) {
     console.error(error);
     return {
-      message: error.message || "Error updating field",
-      status: 500,
+      message: error?.message || "Error updating field",
+      status: error?.status || 500,
       data: error,
     };
   }
