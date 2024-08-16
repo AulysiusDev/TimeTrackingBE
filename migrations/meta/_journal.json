@@ -5,22 +5,8 @@
     {
       "idx": 0,
       "version": "5",
-      "when": 1723625787275,
-      "tag": "0000_thick_white_queen",
-      "breakpoints": true
-    },
-    {
-      "idx": 1,
-      "version": "5",
-      "when": 1723625816843,
-      "tag": "0001_curious_multiple_man",
-      "breakpoints": true
-    },
-    {
-      "idx": 2,
-      "version": "5",
-      "when": 1723639183116,
-      "tag": "0002_ambitious_scalphunter",
+      "when": 1723723621785,
+      "tag": "0000_nostalgic_miss_america",
       "breakpoints": true
     }
   ]

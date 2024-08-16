@@ -1,5 +1,5 @@
 {
-  "id": "e48f6e38-dea9-4d2a-a4ce-f957887de039",
+  "id": "4784ab68-c0f8-4c3b-bca4-e8d316c3d95b",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "5",
   "dialect": "pg",
@@ -20,11 +20,17 @@
           "primaryKey": false,
           "notNull": true
         },
-        "workspace_id": {
-          "name": "workspace_id",
-          "type": "integer",
+        "item_id": {
+          "name": "item_id",
+          "type": "text",
           "primaryKey": false,
-          "notNull": true
+          "notNull": false
+        },
+        "subitem_id": {
+          "name": "subitem_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
         },
         "board_id": {
           "name": "board_id",
@@ -32,11 +38,17 @@
           "primaryKey": false,
           "notNull": true
         },
-        "target_id": {
-          "name": "target_id",
-          "type": "integer",
+        "group_id": {
+          "name": "group_id",
+          "type": "text",
           "primaryKey": false,
           "notNull": false
+        },
+        "workspace_id": {
+          "name": "workspace_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
         },
         "start_date": {
           "name": "start_date",
@@ -114,12 +126,6 @@
         },
         "end_time": {
           "name": "end_time",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "subitem_id": {
-          "name": "subitem_id",
           "type": "integer",
           "primaryKey": false,
           "notNull": false
@@ -217,6 +223,12 @@
           "primaryKey": false,
           "notNull": false
         },
+        "subitem_id": {
+          "name": "subitem_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
         "board_id": {
           "name": "board_id",
           "type": "text",
@@ -241,8 +253,8 @@
           "primaryKey": false,
           "notNull": false
         },
-        "start_date": {
-          "name": "start_date",
+        "date": {
+          "name": "date",
           "type": "timestamp",
           "primaryKey": false,
           "notNull": true,

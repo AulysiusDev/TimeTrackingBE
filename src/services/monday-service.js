@@ -26,10 +26,13 @@ export async function fetchItemName(id) {
 }
 
 // Send a notification to a user. (target is the id of the thing updating about)
-export async function sendNotifications(userIds, target, text) {
+export async function sendNotifications(userIds, creatorId, target, text) {
   // Validate inputs
   if (!target || !text) {
     return { message: "Invalid inputs.", status: 400, data: [] };
+  }
+  if (!creatorId) {
+    return { message: "Unauthorized.", status: 401, data: [] };
   }
   if (!Array.isArray(userIds)) {
     userIds = [userIds];
@@ -45,7 +48,7 @@ export async function sendNotifications(userIds, target, text) {
   const monday = initMondayClient();
   try {
     // Access key fetchung and setting
-    const accessKeyRes = await fetchAuthToken(userIds[0]);
+    const accessKeyRes = await fetchAuthToken(creatorId);
     if (accessKeyRes.status !== 200) {
       return { message: accessKeyRes.message, status: 401, data: [] };
     } else {

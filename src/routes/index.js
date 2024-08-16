@@ -42,7 +42,7 @@ router.post(
 // Fetch logs for display
 router.post(
   "/entries/fetch-data",
-  // authorizeRegularRequest,
+  authorizeRegularRequest,
   fetchTimeEntriesController
 );
 

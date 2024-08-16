@@ -123,17 +123,17 @@ export const calculateDataPoints = (fetchedLogs, targetType) => {
     if (targetType === "item") {
       if (!log.subitemId) {
         itemLogs.push(log);
-        total += parseFloat(log.total);
-        billable += parseFloat(log.billable);
+        total += parseFloat(log.totalHours);
+        billable += parseFloat(log.billableHours);
       } else {
         subitemLogs.push(log);
-        subitemTotal += parseFloat(log.total);
-        subitemBillable += parseFloat(log.billable);
+        subitemTotal += parseFloat(log.totalHours);
+        subitemBillable += parseFloat(log.billableHours);
       }
     } else {
       logs.push(log);
-      total += parseFloat(log.total);
-      billable += parseFloat(log.billable);
+      total += parseFloat(log.totalHours);
+      billable += parseFloat(log.billableHours);
     }
   });
   return {

@@ -56,9 +56,10 @@ export async function validateItem(itemData) {
 }
 
 export async function validateLog(logData) {
+  console.log({ logData });
   const log = z.object({
     userId: z.number(),
-    itemId: z.number().nullable(),
+    itemId: z.string().nullable(),
     subitemId: z.string().nullable(),
     boardId: z.string().nullable(),
     groupId: z.string().nullable(),
@@ -70,7 +71,7 @@ export async function validateLog(logData) {
     note: z.string(),
     ratePerHour: z.number().nullable(),
     currency: z.string().nullable(),
-    status: z.number(),
+    status: z.number().nullable(),
   });
   let hasError;
   let validLogData = {};

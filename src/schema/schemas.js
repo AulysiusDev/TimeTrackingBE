@@ -62,7 +62,6 @@ const LogConfigTable = pgTable("logconfig", {
   startTime: integer("start_time"),
   // Time user enxs work if schedule is 1
   endTime: integer("end_time"),
-  subitemId: integer("subitem_id"),
   hours: numeric("hours", { precision: 8, scale: 2 }),
   name: text("name"),
   // This will be the user id if schedule is 2

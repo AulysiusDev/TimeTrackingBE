@@ -1,5 +1,6 @@
 import { createTimeEntriesService } from "../../services/common/create-entries-service.js";
 import {
+  calculateDataPoints,
   fetchEntriesService,
   filterLogConfigDEntries,
 } from "../../services/common/fetch-entries-service.js";

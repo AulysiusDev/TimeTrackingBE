@@ -18,7 +18,6 @@ export const authorizeRequest = (req, res, next) => {
       signingSecret
     );
     req.session = { accountId, userId, backToUrl, shortLivedToken };
-    console.log({ session: req.session });
     next();
   } catch (err) {
     logger.error(err);
@@ -28,6 +27,7 @@ export const authorizeRequest = (req, res, next) => {
 
 export const authorizeRegularRequest = (req, res, next) => {
   let authHeader = req.headers.authorization;
+  console.log({ authHeader });
   let token = authHeader;
   if (authHeader && authHeader.split(" ").length === 2) {
     token = authHeader && authHeader.split(" ")[1];

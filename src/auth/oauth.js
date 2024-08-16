@@ -12,7 +12,6 @@ export const getAuthKey = async (req, res) => {
   const token = jwt.verify(sessionToken, process.env.CLIENT_SECRET);
   const { user_id } = token.dat;
   try {
-    console.log("Get Auth Key");
     // Verify if usrer has api key saved or not, create user if none exists
     const authTokenRes = await fetchAuthToken(user_id);
     // Server error

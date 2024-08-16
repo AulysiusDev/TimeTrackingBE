@@ -75,7 +75,6 @@ export async function createTimeEntriesService(entryData) {
     entryData.log.endDate,
     daysArr
   );
-  console.log({ dates });
   // Date array validation
   if (!validateDatesArray(dates)) {
     return {
@@ -86,7 +85,6 @@ export async function createTimeEntriesService(entryData) {
     };
   }
   const createLogsRes = await validateAndCreateLogs(entryData, dates);
-  console.log({ createLogsRes });
   // Return error for user if error
   if (createLogsRes.status === 500) {
     return {
@@ -113,26 +111,28 @@ export async function createTimeEntriesService(entryData) {
           entryData.log.endDate
         ).getDate()}`;
 
-  // WHY IS THIS HERE?!
+  // Send notificatio with creator's name, or id if not found.
   const usernamesRes = await findUsernames(entryData.user.creatorId);
   console.dir({ usernamesRes }, { depth: null });
-
-  if (usernamesRes.status !== 200) {
-    return usernamesRes;
-  }
+  const creatorUsername =
+    usernamesRes.status === 200
+      ? usernamesRes?.data?.data?.users[0]?.name
+      : `a user with this id: ${entryData.user.creatorId}`;
 
   // Send notification informing user of time log creation
   if (createLogsRes.data.length > 0) {
-    const message = `${createLogsRes.data.length} time logs were created for you ${dateString}, by ${entryData.user.creatorId} `;
+    const message = `${createLogsRes.data.length} time logs were created for you ${dateString}, by ${creatorUsername}.`;
     const notificationsRes = await sendNotifications(
       entryData.user.ids,
+      entryData.user.creatorId,
       target,
       message
     );
-    console.log({ notificationsRes });
+
     if (notificationsRes.status !== 200) {
       const errorMessage = `There was an error creating  notifications for successful logs. Status: ${notificationsRes.status}; Message: ${notificationsRes.message}.`;
       const errorNotificationRes = await sendNotifications(
+        entryData.user.creatorId,
         entryData.user.creatorId,
         target,
         errorMessage
@@ -296,7 +296,12 @@ export const createLogsArray = (entryData, dates) => {
       const logObj = {
         userId: parseInt(userId.id),
         itemId: JSON.stringify(entryData.item.id) || null,
-        subitemId: JSON.stringify(entryData.item.subitemId) || null,
+        subitemId:
+          entryData.item.subitemId === "null" ||
+          entryData.item.subitemId === null ||
+          !entryData.item.subitemId
+            ? null
+            : JSON.stringify(entryData.item.subitemId),
         boardId: JSON.stringify(entryData.item.boardId) || null,
         groupId: JSON.stringify(entryData.item.groupId) || null,
         workspaceId: JSON.stringify(entryData.item.workspaceId) || null,
@@ -308,7 +313,7 @@ export const createLogsArray = (entryData, dates) => {
         note: entryData.log.note || "",
         ratePerHour: parseFloat(entryData.rateCard.rate) || null,
         currency: JSON.stringify(entryData.rateCard.currency?.value) || null,
-        status: parseInt(0),
+        status: 0,
       };
       return logObj;
     })
