@@ -27,7 +27,6 @@ export const authorizeRequest = (req, res, next) => {
 
 export const authorizeRegularRequest = (req, res, next) => {
   let authHeader = req.headers.authorization;
-  console.log({ authHeader });
   let token = authHeader;
   if (authHeader && authHeader.split(" ").length === 2) {
     token = authHeader && authHeader.split(" ")[1];
