@@ -4,6 +4,8 @@ import {
   fetchEntriesService,
   filterLogConfigDEntries,
 } from "../../services/common/fetch-entries-service.js";
+import { deleteByIds } from "../../services/crud.js";
+import schemas from "../../schema/schemas.js";
 
 // Handle requests to create time entries
 export async function createTimeEntriesController(req, res) {
@@ -90,3 +92,29 @@ export async function fetchTimeEntriesController(req, res) {
     });
   }
 }
+
+export const deleteEntriesController = async (req, res) => {
+  const { ids, table } = req.body;
+  //   Check ids exist
+  if (!ids) {
+    return res.status(400).json({ message: "No valid entry IDs provided." });
+  }
+  if (!table) {
+    return res.status(400).json({ message: "No table name provided." });
+  }
+  if (!schemas[table]) {
+    return res.status(400).json({ message: `Invalid table name: ${table}.` });
+  }
+  try {
+    //   Perform deletion from db
+    const deleteRes = await deleteByIds(schemas[table], schemas[table].id, ids);
+    return res
+      .status(deleteRes.status)
+      .json({ message: deleteRes.message, data: deleteRes.data });
+  } catch (error) {
+    console.error("Error deleting entries: ", error);
+    return res
+      .status(error.status || 500)
+      .json({ message: error.message || "Internal sever error", data: error });
+  }
+};

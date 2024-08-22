@@ -1,6 +1,7 @@
 import express from "express";
 import {
   createTimeEntriesController,
+  deleteEntriesController,
   fetchTimeEntriesController,
 } from "../controllers/common/entries-controller.js";
 import {
@@ -12,10 +13,6 @@ import {
   generateCsv,
   generateXlsx,
 } from "../controllers/item/export-controller.js";
-import {
-  deleteEntries,
-  fetchHours,
-} from "../controllers/item/display-controller.js";
 import { authorizeRegularRequest, authorizeRequest } from "../middleware.js";
 import {
   handleAutomationTrigger,
@@ -32,10 +29,10 @@ router.post("/oauth/fetch-auth-key", authorizeRegularRequest, getAuthKey);
 router.get("/oauth/callback", saveAuthKey);
 router.post("/create-jwt", authorizeRegularRequest, createJWT);
 
-// **Logs
+// Entries
 // Create logs
 router.post(
-  "/create-time-entry",
+  "/entries/create-time-entry",
   authorizeRegularRequest,
   createTimeEntriesController
 );
@@ -45,7 +42,11 @@ router.post(
   authorizeRegularRequest,
   fetchTimeEntriesController
 );
-router.delete("/delete-entries", authorizeRegularRequest, deleteEntries);
+router.delete(
+  "/entries/delete-entries",
+  authorizeRegularRequest,
+  deleteEntriesController
+);
 
 // Item routes
 // router.post("/start-stop-automation", startStopAutomation);

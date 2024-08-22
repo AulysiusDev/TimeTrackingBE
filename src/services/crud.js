@@ -90,22 +90,24 @@ export async function findInArray(schema, schemaId, array) {
 }
 
 export async function deleteByIds(schema, schemaId, ids) {
-  if (!Array.isArray(ids)) {
-    ids = [ids];
+  if (!schema || !schemaId) {
+    return { message: "Invalid schema or schema ID.", status: 400, data: [] };
   }
+
+  const idsArray = Array.isArray(ids) ? ids : [ids];
   try {
     const db = await getDrizzleDbClient();
     const res = await db
       .delete(schema)
-      .where(inArray(schemaId, ids))
+      .where(inArray(schemaId, idsArray))
       .returning({ deletedId: schemaId });
     return { message: "Deleted successfully", status: 200, data: res };
   } catch (error) {
     console.error("Error deleting logs:", error);
     return {
-      message: error?.message || "Error deleting logs",
-      status: error?.status || 500,
-      data: error,
+      message: error.message || "Error deleting entries",
+      status: error.status || 500,
+      data: error || [],
     };
   }
 }
