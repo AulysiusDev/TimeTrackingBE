@@ -49,7 +49,6 @@ export async function fetchTimeEntriesController(req, res) {
       switch (tableName) {
         case "logs":
           const metrics = calculateDataPoints(fetchEntriesRes.data, targetType);
-          console.log({ metrics });
           return res.status(200).json({
             message: "Success",
             data: metrics,

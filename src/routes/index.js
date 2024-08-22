@@ -45,14 +45,14 @@ router.post(
   authorizeRegularRequest,
   fetchTimeEntriesController
 );
+router.delete("/delete-entries", authorizeRegularRequest, deleteEntries);
 
 // Item routes
 // router.post("/start-stop-automation", startStopAutomation);
 // router.post("/fetch-item-settings", getLogConfig);
 // router.post("/create-log-config", createLogConfigEntry);
-// router.delete("/delete-entries", deleteEntries);
-// router.post("/generate-xlsx", generateXlsx);
-// router.post("/generate-csv", generateCsv);
+router.post("/generate-xlsx", authorizeRegularRequest, generateXlsx);
+router.post("/generate-csv", authorizeRegularRequest, generateCsv);
 // router.post("/automation-triggered", authorizeRequest, handleAutomationTrigger);
 // router.post("/unsubscribe", authorizeRequest, unsubscribe);
 // router.post("/subscribe", authorizeRequest, subscribe);

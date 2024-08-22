@@ -7,7 +7,6 @@ import {
 } from "../../services/item/display-service.js";
 
 export async function fetchHours(req, res) {
-  console.log("Fetching");
   // Define variables
   const itemId = req.body.itemId;
   let itemsLogs = [];

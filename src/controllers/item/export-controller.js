@@ -5,8 +5,8 @@ import {
 } from "../../services/item/export-service.js";
 
 export async function generateXlsx(req, res) {
-  let { logs } = req.body;
-  logs = configTimeStamps(logs);
+  let { exportLogs } = req.body;
+  const logs = configTimeStamps(exportLogs.logs);
   const { excelBuffer } = convertJsonToXLSX(logs);
   res.setHeader(
     "Content-Type",
@@ -17,8 +17,8 @@ export async function generateXlsx(req, res) {
 }
 
 export async function generateCsv(req, res) {
-  let { logs } = req.body;
-  logs = configTimeStamps(logs);
+  let { exportLogs } = req.body;
+  const logs = configTimeStamps(exportLogs.logs);
   const csvFile = convertJsonToCsv(logs);
   res.setHeader("Content-Type", "text/csv");
   res.setHeader("Content-Disposition", `attachment; filename="log.csv"`);
