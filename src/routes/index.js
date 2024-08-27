@@ -20,6 +20,7 @@ import {
   unsubscribe,
 } from "../controllers/item/automation-controller.js";
 import { createJWT, getAuthKey, saveAuthKey } from "../auth/oauth.js";
+import { createAutomationController } from "../controllers/automation-controller.js";
 
 const router = express.Router();
 
@@ -46,6 +47,12 @@ router.delete(
   "/entries/delete-entries",
   authorizeRegularRequest,
   deleteEntriesController
+);
+
+router.post(
+  "/automate/create-automation",
+  authorizeRegularRequest,
+  createAutomationController
 );
 
 // Item routes
