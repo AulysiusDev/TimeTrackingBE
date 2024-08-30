@@ -79,10 +79,25 @@ export async function fetchTimeEntriesController(req, res) {
           });
       }
     }
+    let total = 0;
+    let billable = 0;
+    let subitemTotal = 0;
+    let subitemBillable = 0;
+    let itemLogs = [];
+    let subitemLogs = [];
+    let logs = [];
     // Standard return
     return res.status(200).json({
       message: fetchEntriesRes.message || "Success",
-      data: fetchEntriesRes.data || [],
+      data: fetchEntriesRes.data || {
+        logs,
+        itemLogs,
+        subitemLogs,
+        total,
+        billable,
+        subitemTotal,
+        subitemBillable,
+      },
     });
   } catch (error) {
     console.error(error);

@@ -1,7 +1,6 @@
 import { z } from "zod";
 
 export async function validateUser(userObj) {
-  console.log(userObj);
   const user = z.object({
     id: z.number(),
     ratePerHour: z.number().nullable(),
@@ -92,15 +91,12 @@ export async function validateLog(logData) {
   };
 }
 
-export async function validateLogConfig(logConfigData) {
-  const labelSchema = z.object({
-    label: z.string(),
-    index: z.number(),
-  });
+export async function validateAutomationConfig(logConfigData) {
   const logConfig = z.object({
     name: z.string(),
     workspaceId: z.number(),
     boardId: z.number(),
+    groupId: z.string().nullable(),
     userId: z.number(),
     itemId: z.number(),
     startDate: z.date(),
@@ -110,8 +106,8 @@ export async function validateLogConfig(logConfigData) {
     default: z.boolean(),
     statusColumnId: z.string(),
     peopleColumnId: z.string(),
-    startLabels: z.array(labelSchema).nonempty(),
-    endLabels: z.array(labelSchema).nonempty(),
+    startLabels: z.array(z.string()).nonempty(),
+    endLabels: z.array(z.string()).nonempty(),
     rateCardId: z.number().nullable(),
     ratePerHour: z.number().nullable(),
     currency: z.string().nullable(),
@@ -119,7 +115,7 @@ export async function validateLogConfig(logConfigData) {
     startTime: z.number().nullable(),
     subitemId: z.number().nullable(),
     active: z.boolean(),
-    hours: z.number(),
+    hours: z.number().nullable(),
   });
   let hasError;
   let validLogConfigData = {};

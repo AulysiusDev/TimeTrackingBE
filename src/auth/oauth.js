@@ -1,7 +1,8 @@
-import { UsersTable } from "../schema/schemas.js";
+import schemas, { UsersTable } from "../schema/schemas.js";
 import { createEntries, findById, updateField } from "../services/crud.js";
 import jwt from "jsonwebtoken";
 import initMondayClient from "monday-sdk-js";
+import { getAccessKey } from "./cache.js";
 
 const monday = initMondayClient();
 
@@ -212,4 +213,45 @@ const fetchSaveAccessKey = async (code, userId) => {
       data: error,
     };
   }
+};
+
+// Used by functions to get an access key which has been saved to the db, will return 401 if not found (shouldn't happen but just in case),
+// Return 200 if found and the api key to access monday data of the creator's account.
+export const fetchAccessKey = async (creatorId) => {
+  // Find creators access key, or use oAuth if not provided yet
+  const creatorRes = await findById(
+    schemas.UsersTable,
+    schemas.UsersTable.id,
+    creatorId
+  );
+  if (creatorRes.status !== 200) {
+    return { message: creatorRes.message, data: creatorRes.data, status: 500 };
+  }
+  //   No access key provided
+  const accessKey = creatorRes.data[0]?.accessKey;
+  if (!accessKey) {
+    return {
+      message: "Unauthorized",
+      status: 401,
+      data: { id: entryData.user.creatorId },
+    };
+  }
+  // Found and return
+  return { message: "Authorized", status: 200, data: accessKey };
+};
+
+export const getAndSetAccessKey = async (creatorId) => {
+  const cachedAccessKey = getAccessKey(creatorId);
+  if (!cachedAccessKey) {
+    // Access key fetchung and setting
+    const accessKeyRes = await fetchAuthToken(creatorId);
+    if (accessKeyRes.status !== 200) {
+      return false;
+    } else {
+      monday.setToken(accessKeyRes.data);
+    }
+  } else {
+    monday.setToken(cachedAccessKey);
+  }
+  return true;
 };

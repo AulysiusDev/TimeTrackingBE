@@ -1,3 +1,4 @@
+import { fetchAccessKey } from "../../auth/oauth.js";
 import {
   validateItem,
   validateLog,
@@ -5,8 +6,9 @@ import {
 } from "../../db/validators.js";
 import { createDatesArray, validateDatesArray } from "../../helpers.js";
 import schemas from "../../schema/schemas.js";
-import { createEntries, findById, findInArray, updateField } from "../crud.js";
+import { createEntries, findById, findInArray } from "../crud.js";
 import { findUsernames, sendNotifications } from "../monday-service.js";
+import { cacheAccessKey } from "../../auth/cache.js";
 
 // Root function, creates time logs from input data, across a period and for multiple users if selected
 export async function createTimeEntriesService(entryData) {
@@ -23,33 +25,11 @@ export async function createTimeEntriesService(entryData) {
   if (validatedUsersRes.status === 500 || validatedUsersRes.status === 400) {
     return { status: validatedUsersRes.status, ...validatedUsersRes };
   }
-  // Find creators access key, or use oAuth if not provided yet
-  const creatorRes = await findById(
-    schemas.UsersTable,
-    schemas.UsersTable.id,
-    entryData.user.creatorId
-  );
-  if (creatorRes.status !== 200) {
-    return { message: creatorRes.message, data: creatorRes.data };
-  }
-  const accessKey = creatorRes.data[0]?.accessKey;
-  if (!accessKey) {
-    return {
-      message: "Unauthorized",
-      status: 401,
-      data: { id: entryData.user.creatorId },
-    };
-  }
-
-  const updateWithAccessTokenRes = await updateField(
-    schemas.UsersTable,
-    schemas.UsersTable.id,
-    schemas.UsersTable.accessKey,
-    { accessKey: accessKey },
-    entryData.user.creatorId
-  );
-  if (updateWithAccessTokenRes.status === 500) {
-    return updateWithAccessTokenRes;
+  const accessKeyRes = await fetchAccessKey(entryData.user.creatorId);
+  if (accessKeyRes.status === 401 || !accessKeyRes) {
+    return accessKeyRes;
+  } else if (accessKeyRes.status === 200) {
+    cacheAccessKey(entryData.user.creatorId, accessKeyRes.data);
   }
 
   // custom days or monday to friday (1-5 index)
@@ -112,8 +92,10 @@ export async function createTimeEntriesService(entryData) {
         ).getDate()}`;
 
   // Send notificatio with creator's name, or id if not found.
-  const usernamesRes = await findUsernames(entryData.user.creatorId);
-  console.dir({ usernamesRes }, { depth: null });
+  const usernamesRes = await findUsernames(
+    entryData.user.creatorId,
+    entryData.user.creatorId
+  );
   const creatorUsername =
     usernamesRes.status === 200
       ? usernamesRes?.data?.data?.users[0]?.name
@@ -152,7 +134,8 @@ export async function createTimeEntriesService(entryData) {
 
 export async function validateAndCreateUsers(entryData) {
   // Create array of ids for validation
-  const userIds = entryData.user.ids.map((user) => user.id) || [];
+  let userIds = entryData.user.ids.map((user) => user.id) || [];
+  userIds = [...userIds, entryData.user.creatorId];
   if (!userIds.length) {
     return { message: "No users to validate.", status: 400, data: [] };
   }

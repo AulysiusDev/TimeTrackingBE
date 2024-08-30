@@ -18,9 +18,9 @@ import {
   handleAutomationTrigger,
   subscribe,
   unsubscribe,
-} from "../controllers/item/automation-controller.js";
+} from "../controllers/item/automation-trigger-controller.js";
 import { createJWT, getAuthKey, saveAuthKey } from "../auth/oauth.js";
-import { createAutomationController } from "../controllers/automation-controller.js";
+import { createAutomationConfigController } from "../controllers/automation-controller.js";
 
 const router = express.Router();
 
@@ -52,7 +52,7 @@ router.delete(
 router.post(
   "/automate/create-automation",
   authorizeRegularRequest,
-  createAutomationController
+  createAutomationConfigController
 );
 
 // Item routes

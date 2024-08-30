@@ -93,10 +93,26 @@ export const fetchEntriesService = async (filters = {}) => {
         data: results,
       };
     } else {
+      let total = 0;
+      let billable = 0;
+      let subitemTotal = 0;
+      let subitemBillable = 0;
+      let itemLogs = [];
+      let subitemLogs = [];
+      let logs = [];
+
       return {
         message: "No entries found matching search params.",
         status: 200,
-        data: [],
+        data: {
+          logs,
+          itemLogs,
+          subitemLogs,
+          total,
+          billable,
+          subitemTotal,
+          subitemBillable,
+        },
       };
     }
   } catch (error) {
@@ -136,6 +152,7 @@ export const calculateDataPoints = (fetchedLogs, targetType) => {
       billable += parseFloat(log.billableHours);
     }
   });
+  console.log({ itemLogs });
   return {
     logs,
     itemLogs,

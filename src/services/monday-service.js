@@ -1,29 +1,26 @@
 import initMondayClient from "monday-sdk-js";
-import { fetchAuthToken } from "../auth/oauth.js";
+import { fetchAuthToken, getAndSetAccessKey } from "../auth/oauth.js";
 const monday = initMondayClient();
 
-// Fetch item names as only id saved (target name saved now, is this function neccessary?!)
-export async function fetchItemName(id) {
-  try {
-    // Access key fetchung and setting
-    const accessKeyRes = await fetchAuthToken(userIds[0]);
-    if (accessKeyRes.status !== 200) {
-      return { message: accessKeyRes.message, status: 401, data: [] };
-    } else {
-      monday.setToken(accessKeyRes.data);
-    }
-    const query = `query{
-      items(ids: [${id}]){
-        name
-      }
-    }`;
-    const response = await monday.api(query);
-    return response;
-  } catch (error) {
-    console.error(error);
-    return "Could not locate item id";
-  }
-}
+// // Fetch item names as only id saved (target name saved now, is this function neccessary?!)
+// export async function fetchItemName(id, creatorId) {
+//   try {
+//     const authorized = await getAndSetAccessKey(creatorId);
+//     if (!authorized) {
+//       return { message: "Unauthorized", status: 401, data: [] };
+//     }
+//     const query = `query{
+//       items(ids: [${id}]){
+//         name
+//       }
+//     }`;
+//     const response = await monday.api(query);
+//     return response;
+//   } catch (error) {
+//     console.error(error);
+//     return "Could not locate item id";
+//   }
+// }
 
 // Send a notification to a user. (target is the id of the thing updating about)
 export async function sendNotifications(userIds, creatorId, target, text) {
@@ -44,15 +41,10 @@ export async function sendNotifications(userIds, creatorId, target, text) {
       data: [],
     };
   }
-
-  const monday = initMondayClient();
   try {
-    // Access key fetchung and setting
-    const accessKeyRes = await fetchAuthToken(creatorId);
-    if (accessKeyRes.status !== 200) {
-      return { message: accessKeyRes.message, status: 401, data: [] };
-    } else {
-      monday.setToken(accessKeyRes.data);
+    const authorized = await getAndSetAccessKey(creatorId);
+    if (!authorized) {
+      return { message: "Unauthorized", status: 401, data: [] };
     }
     for (const userId of userIds) {
       const query = `
@@ -68,7 +60,7 @@ export async function sendNotifications(userIds, creatorId, target, text) {
         text: text,
         targetType: "Project",
       };
-      const res = await monday.api(query, { variables });
+      await monday.api(query, { variables });
     }
     return {
       message: "Success sending notifications",
@@ -86,18 +78,15 @@ export async function sendNotifications(userIds, creatorId, target, text) {
 }
 
 // Fins usernames for users
-export const findUsernames = async (userIds) => {
+export const findUsernames = async (userIds, creatorId) => {
   // Array needs to be passed to this query, sometimes try to find multiple also
   if (!Array.isArray(userIds)) {
     userIds = [userIds];
   }
   try {
-    // Access key fetchung and setting
-    const accessKeyRes = await fetchAuthToken(userIds[0]);
-    if (accessKeyRes.status !== 200) {
-      return { message: accessKeyRes.message, status: 401, data: [] };
-    } else {
-      monday.setToken(accessKeyRes.data);
+    const authorized = await getAndSetAccessKey(creatorId);
+    if (!authorized) {
+      return { message: "Unauthorized", status: 401, data: [] };
     }
 
     const query = `query {

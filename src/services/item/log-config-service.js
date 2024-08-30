@@ -1,4 +1,4 @@
-import { validateLogConfig } from "../../db/validators.js";
+import { validateAutomationConfig } from "../../db/validators.js";
 import schema from "../../schema/schemas.js";
 import schemas from "../../schema/schemas.js";
 import { createEntries, findById } from "../crud.js";
@@ -22,7 +22,9 @@ export async function fetchLogConfigs(id, item) {
 }
 
 export async function validateAndCreateLogConfig(logConfigObj) {
-  const { message, hasError, data } = await validateLogConfig(logConfigObj);
+  const { message, hasError, data } = await validateAutomationConfig(
+    logConfigObj
+  );
   if (hasError === true) {
     return {
       message: message ? message : "Invalid request. Please try again.",
