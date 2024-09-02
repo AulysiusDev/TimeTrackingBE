@@ -1,4 +1,4 @@
-import schema, { LogConfigTable } from "../../schema/schemas.js";
+import schema, { AutomationConfigTable } from "../../schema/schemas.js";
 import { updateField } from "../crud.js";
 import { getDrizzleDbClient } from "../db-client.js";
 import { and, eq, isNull, or } from "drizzle-orm";
@@ -43,9 +43,9 @@ export async function handleAutomationTriggerService(payload) {
   // If starting tracking for entry log
   if (createLog === false) {
     const updateRes = await updateField(
-      LogConfigTable,
-      LogConfigTable.id,
-      LogConfigTable.startDate,
+      AutomationConfigTable,
+      AutomationConfigTable.id,
+      AutomationConfigTable.startDate,
       { startDate: new Date() },
       logConfigRes.data.id
     );
@@ -106,9 +106,9 @@ export async function handleAutomationTriggerService(payload) {
     );
 
     const response = await updateField(
-      LogConfigTable,
-      LogConfigTable.id,
-      LogConfigTable.startDate,
+      AutomationConfigTable,
+      AutomationConfigTable.id,
+      AutomationConfigTable.startDate,
       { startDate: null },
       logConfigRes.data.id
     );
@@ -127,19 +127,19 @@ export async function fetchLogConfig(itemId, boardId, columnId) {
   try {
     const results = await db
       .select()
-      .from(schema.LogConfigTable)
+      .from(schema.AutomationConfigTable)
       .where(
         or(
           and(
-            eq(schema.LogConfigTable.itemId, itemId),
-            eq(schema.LogConfigTable.statusColumnId, columnId),
-            eq(schema.LogConfigTable.active, true)
+            eq(schema.AutomationConfigTable.itemId, itemId),
+            eq(schema.AutomationConfigTable.statusColumnId, columnId),
+            eq(schema.AutomationConfigTable.active, true)
           ),
           and(
-            isNull(schema.LogConfigTable.itemId),
-            eq(schema.LogConfigTable.boardId, boardId),
-            eq(schema.LogConfigTable.statusColumnId, columnId),
-            eq(schema.LogConfigTable.active, true)
+            isNull(schema.AutomationConfigTable.itemId),
+            eq(schema.AutomationConfigTable.boardId, boardId),
+            eq(schema.AutomationConfigTable.statusColumnId, columnId),
+            eq(schema.AutomationConfigTable.active, true)
           )
         )
       );

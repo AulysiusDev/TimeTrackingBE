@@ -91,16 +91,16 @@ export async function createLogConfigEntry(req, res) {
 export async function startStopAutomation(req, res) {
   const { logId, action } = await req.body;
   const startStopRes = await updateField(
-    schemas.LogConfigTable,
-    schemas.LogConfigTable.id,
-    schemas.LogConfigTable.active,
+    schemas.AutomationConfigTable,
+    schemas.AutomationConfigTable.id,
+    schemas.AutomationConfigTable.active,
     { active: action },
     logId
   );
   const startDateRes = await updateField(
-    schemas.LogConfigTable,
-    schemas.LogConfigTable.id,
-    schemas.LogConfigTable.startDate,
+    schemas.AutomationConfigTable,
+    schemas.AutomationConfigTable.id,
+    schemas.AutomationConfigTable.startDate,
     { startDate: null },
     logId
   );

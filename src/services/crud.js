@@ -114,9 +114,9 @@ export async function deleteByIds(schema, schemaId, ids) {
 
 // **Example input for updateField**
 // updateField(
-//   schemas.LogConfigTable,
-//   schemas.LogConfigTable.id,
-//   schemas.LogConfigTable.startDate,
+//   schemas.AutomationConfigTable,
+//   schemas.AutomationConfigTable.id,
+//   schemas.AutomationConfigTable.startDate,
 //   { startDate: null },
 //   logId
 // );

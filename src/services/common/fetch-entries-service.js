@@ -1,5 +1,9 @@
 import { and, eq, lte, gte } from "drizzle-orm";
-import { LogConfigTable, LogsTable, UsersTable } from "../../schema/schemas.js";
+import {
+  AutomationConfigTable,
+  LogsTable,
+  UsersTable,
+} from "../../schema/schemas.js";
 import { getDrizzleDbClient } from "../db-client.js";
 
 // Will fetch data from any table with nay filters
@@ -27,7 +31,7 @@ export const fetchEntriesService = async (filters = {}) => {
   const tableMapping = {
     users: UsersTable,
     logs: LogsTable,
-    logConfig: LogConfigTable,
+    logConfig: AutomationConfigTable,
   };
   const table = tableMapping[tableName.toLowerCase()];
   // Ensure table exists

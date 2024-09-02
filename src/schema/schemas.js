@@ -30,7 +30,7 @@ const UsersTable = pgTable("users", {
 //   createdAt: timestamp("created_at").defaultNow(),
 // });
 
-const LogConfigTable = pgTable("logconfig", {
+const AutomationConfigTable = pgTable("automationconfig", {
   id: serial("id").primaryKey(),
   userId: integer("user_id")
     .notNull()
@@ -74,18 +74,21 @@ const LogConfigTable = pgTable("logconfig", {
   active: boolean("active").default(false),
 });
 
-const logsConfigRelations = relations(LogConfigTable, ({ one }) => ({
-  user: one(UsersTable, {
-    relationName: "user",
-    fields: [LogConfigTable.userId],
-    references: [UsersTable.id],
-  }),
-  rateCard: one(UsersTable, {
-    relationName: "rateCard",
-    fields: [LogConfigTable.rateCardId],
-    references: [UsersTable.id],
-  }),
-}));
+const AutomationConfigRealtions = relations(
+  AutomationConfigTable,
+  ({ one }) => ({
+    user: one(UsersTable, {
+      relationName: "user",
+      fields: [AutomationConfigTable.userId],
+      references: [UsersTable.id],
+    }),
+    rateCard: one(UsersTable, {
+      relationName: "rateCard",
+      fields: [AutomationConfigTable.rateCardId],
+      references: [UsersTable.id],
+    }),
+  })
+);
 // Can create logs for items, boards or workspaces
 const LogsTable = pgTable("logs", {
   id: serial("id").primaryKey(),
@@ -117,15 +120,15 @@ const logsRelations = relations(LogsTable, ({ many }) => ({
 
 export {
   UsersTable,
-  LogConfigTable,
-  logsConfigRelations,
+  AutomationConfigTable,
+  AutomationConfigRealtions,
   LogsTable,
   logsRelations,
 };
 const schema = {
   UsersTable,
-  LogConfigTable,
-  logsConfigRelations,
+  AutomationConfigTable,
+  AutomationConfigRealtions,
   LogsTable,
   logsRelations,
 };

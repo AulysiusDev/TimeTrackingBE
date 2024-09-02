@@ -1,5 +1,6 @@
 import initMondayClient from "monday-sdk-js";
 import { fetchAuthToken, getAndSetAccessKey } from "../auth/oauth.js";
+import { getCachedAccessKey } from "../auth/cache.js";
 const monday = initMondayClient();
 
 // // Fetch item names as only id saved (target name saved now, is this function neccessary?!)
@@ -42,9 +43,11 @@ export async function sendNotifications(userIds, creatorId, target, text) {
     };
   }
   try {
-    const authorized = await getAndSetAccessKey(creatorId);
-    if (!authorized) {
+    const accessKey = getCachedAccessKey(creatorId);
+    if (!accessKey) {
       return { message: "Unauthorized", status: 401, data: [] };
+    } else {
+      monday.setToken(accessKey);
     }
     for (const userId of userIds) {
       const query = `
@@ -84,9 +87,11 @@ export const findUsernames = async (userIds, creatorId) => {
     userIds = [userIds];
   }
   try {
-    const authorized = await getAndSetAccessKey(creatorId);
-    if (!authorized) {
+    const accessKey = getCachedAccessKey(creatorId);
+    if (!accessKey) {
       return { message: "Unauthorized", status: 401, data: [] };
+    } else {
+      monday.setToken(accessKey);
     }
 
     const query = `query {
@@ -107,6 +112,52 @@ export const findUsernames = async (userIds, creatorId) => {
     return {
       message: "Error finding usernames.",
       status: 500,
+      data: error,
+    };
+  }
+};
+
+export const findItemGroupId = async (boardId, itemId, id) => {
+  // Get api key
+  const accessKey = getCachedAccessKey(id);
+  if (!accessKey) {
+    return { message: "Unauthorized", status: 401, data: [] };
+  } else {
+    monday.setToken(accessKey);
+  }
+  // Could potentially add a find access key from db if not cached, but should be cached at the beginning of every req
+  try {
+    const query = `
+    query ($itemId: ID!) {
+        items(ids: [$itemId]) {
+          group {
+            id
+        }
+      }
+    }
+  `;
+    const variables = {
+      itemId: itemId,
+    };
+    const results = await monday.api(query, { variables });
+    if (results.data?.items?.length <= 0) {
+      return {
+        message:
+          "No group matching this item, please ensure the item id is valid.",
+        status: 400,
+        data: results.data,
+      };
+    }
+    return {
+      message: "Group id found successfully.",
+      status: 200,
+      data: results.data?.items[0].group,
+    };
+  } catch (error) {
+    console.error(error);
+    return {
+      message: error.message || "Internal server error.",
+      status: error.status || 500,
       data: error,
     };
   }

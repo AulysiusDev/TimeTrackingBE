@@ -4,10 +4,10 @@ export const cacheAccessKey = (userId, accessKey) => {
   accessKeyCache.set(userId, accessKey);
 };
 
-export const getAccessKey = (userId) => {
+export const getCachedAccessKey = (userId) => {
   return accessKeyCache.get(userId);
 };
 
-export const removeAccessKey = (userId) => {
+export const removeCachedAccessKey = (userId) => {
   accessKeyCache.delete(userId);
 };

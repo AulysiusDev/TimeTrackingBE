@@ -7,10 +7,10 @@ import { addUsernames } from "./display-service.js";
 
 export async function fetchLogConfigs(id, item) {
   const schemaToUse = item
-    ? schemas.LogConfigTable.itemId
-    : schemas.LogConfigTable.boardId;
+    ? schemas.AutomationConfigTable.itemId
+    : schemas.AutomationConfigTable.boardId;
   try {
-    const res = await findById(schemas.LogConfigTable, schemaToUse, id);
+    const res = await findById(schemas.AutomationConfigTable, schemaToUse, id);
     if (res.status === 500) {
       return { message: "Failed to fetch", status: 500, data: null };
     }
@@ -45,7 +45,10 @@ export async function validateAndCreateLogConfig(logConfigObj) {
     startLabels: JSON.stringify(data.startLabels),
     endLabels: JSON.stringify(data.endLabels),
   };
-  const createRes = await createEntries(schema.LogConfigTable, newConfigObj);
+  const createRes = await createEntries(
+    schema.AutomationConfigTable,
+    newConfigObj
+  );
   return createRes;
 }
 

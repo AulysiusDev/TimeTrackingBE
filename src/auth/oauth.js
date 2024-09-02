@@ -2,7 +2,7 @@ import schemas, { UsersTable } from "../schema/schemas.js";
 import { createEntries, findById, updateField } from "../services/crud.js";
 import jwt from "jsonwebtoken";
 import initMondayClient from "monday-sdk-js";
-import { getAccessKey } from "./cache.js";
+import { getCachedAccessKey } from "./cache.js";
 
 const monday = initMondayClient();
 
@@ -217,23 +217,24 @@ const fetchSaveAccessKey = async (code, userId) => {
 
 // Used by functions to get an access key which has been saved to the db, will return 401 if not found (shouldn't happen but just in case),
 // Return 200 if found and the api key to access monday data of the creator's account.
-export const fetchAccessKey = async (creatorId) => {
+export const fetchAccessKey = async (userId) => {
   // Find creators access key, or use oAuth if not provided yet
   const creatorRes = await findById(
     schemas.UsersTable,
     schemas.UsersTable.id,
-    creatorId
+    userId
   );
   if (creatorRes.status !== 200) {
     return { message: creatorRes.message, data: creatorRes.data, status: 500 };
   }
   //   No access key provided
   const accessKey = creatorRes.data[0]?.accessKey;
+  console.log({ accessKey });
   if (!accessKey) {
     return {
       message: "Unauthorized",
       status: 401,
-      data: { id: entryData.user.creatorId },
+      data: { id: userId },
     };
   }
   // Found and return
@@ -241,7 +242,7 @@ export const fetchAccessKey = async (creatorId) => {
 };
 
 export const getAndSetAccessKey = async (creatorId) => {
-  const cachedAccessKey = getAccessKey(creatorId);
+  const cachedAccessKey = getCachedAccessKey(creatorId);
   if (!cachedAccessKey) {
     // Access key fetchung and setting
     const accessKeyRes = await fetchAuthToken(creatorId);

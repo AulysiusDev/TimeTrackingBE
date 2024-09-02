@@ -120,3 +120,10 @@ export function calculateHours(logConfig, current) {
   }
   return parseFloat(maxHours.toFixed(2));
 }
+export const safeJsonParse = (str, fallback) => {
+  try {
+    return JSON.parse(str);
+  } catch (e) {
+    return fallback;
+  }
+};

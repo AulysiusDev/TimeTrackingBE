@@ -1,11 +1,11 @@
 {
-  "id": "b3283090-4cd2-468f-9a2d-3c0d59066596",
-  "prevId": "00000000-0000-0000-0000-000000000000",
+  "id": "2fbf95ef-b014-4d2c-915f-3c45db40a22d",
+  "prevId": "b3283090-4cd2-468f-9a2d-3c0d59066596",
   "version": "5",
   "dialect": "pg",
   "tables": {
-    "logconfig": {
-      "name": "logconfig",
+    "automationconfig": {
+      "name": "automationconfig",
       "schema": "",
       "columns": {
         "id": {
@@ -171,9 +171,9 @@
       },
       "indexes": {},
       "foreignKeys": {
-        "logconfig_user_id_users_id_fk": {
-          "name": "logconfig_user_id_users_id_fk",
-          "tableFrom": "logconfig",
+        "automationconfig_user_id_users_id_fk": {
+          "name": "automationconfig_user_id_users_id_fk",
+          "tableFrom": "automationconfig",
           "tableTo": "users",
           "columnsFrom": [
             "user_id"
@@ -184,9 +184,9 @@
           "onDelete": "no action",
           "onUpdate": "no action"
         },
-        "logconfig_rate_card_id_users_id_fk": {
-          "name": "logconfig_rate_card_id_users_id_fk",
-          "tableFrom": "logconfig",
+        "automationconfig_rate_card_id_users_id_fk": {
+          "name": "automationconfig_rate_card_id_users_id_fk",
+          "tableFrom": "automationconfig",
           "tableTo": "users",
           "columnsFrom": [
             "rate_card_id"

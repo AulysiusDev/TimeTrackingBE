@@ -1,9 +1,12 @@
 import { validateAndCreateUsers } from "./common/create-entries-service.js";
-import { createEntries } from "./crud.js";
-import { LogConfigTable } from "../schema/schemas.js";
+import { createEntries, findById } from "./crud.js";
+import { AutomationConfigTable } from "../schema/schemas.js";
 import { fetchAccessKey } from "../auth/oauth.js";
 import { cacheAccessKey } from "../auth/cache.js";
 import { validateAutomationConfig } from "../db/validators.js";
+import { findAutomationConfigs } from "./advanced-crud.js";
+import { findItemGroupId } from "./monday-service.js";
+import { safeJsonParse } from "../helpers.js";
 
 export const createAutomatonService = async (entryData) => {
   if (!entryData?.sessionToken) {
@@ -20,7 +23,7 @@ export const createAutomatonService = async (entryData) => {
     return { status: validatedUsersRes.status, ...validatedUsersRes };
   }
   //  Cache access key
-  const accessKeyRes = fetchAccessKey(entryData.user.creatorId);
+  const accessKeyRes = await fetchAccessKey(entryData.user.creatorId);
   if (accessKeyRes.status === 401) {
     return accessKeyRes;
   }
@@ -108,6 +111,81 @@ export async function validateAndCreateAutomationConfig(logConfigObj) {
     startLabels: JSON.stringify(data.startLabels),
     endLabels: JSON.stringify(data.endLabels),
   };
-  const createRes = await createEntries(LogConfigTable, newConfigObj);
+  const createRes = await createEntries(AutomationConfigTable, newConfigObj);
   return createRes;
 }
+
+export const fetchAutomationConfigService = async (
+  boardId,
+  itemId = null,
+  id
+) => {
+  if (!id) {
+    return { message: "Unauthorized.", status: 401, data: [] };
+  }
+  if (!boardId) {
+    return { message: "No board id provided.", data: [] };
+  }
+  try {
+    //  Cache access key
+    const accessKeyRes = await fetchAccessKey(id);
+    if (accessKeyRes.status === 401) {
+      return accessKeyRes;
+    }
+    cacheAccessKey(id, accessKeyRes.data);
+
+    // if the item id is not null, then we are searching for all automations for that item,
+    // ... automations for the entrie group the item is in will be relevant,
+    // ... even though the itemId won't be present on the automation, but the group id will be
+    let groupId = null;
+    if (itemId) {
+      const findItemGroupIdRes = await findItemGroupId(boardId, itemId, id);
+      if (findItemGroupIdRes.status === 400) {
+        return findItemGroupIdRes;
+      } else {
+        groupId = findItemGroupIdRes.data.id || null;
+      }
+    }
+    // Reques is for board wide automations
+    const fetchAutomationConfigRes = await findAutomationConfigs(
+      boardId,
+      groupId,
+      itemId || null
+    );
+    if (
+      Array.isArray(fetchAutomationConfigRes) &&
+      fetchAutomationConfigRes.data.length <= 0
+    ) {
+      return fetchAutomationConfigRes;
+    } else {
+      const formattedAutomationConfigs = formatAutomationConfigs(
+        fetchAutomationConfigRes.data
+      );
+      console.log({ formattedAutomationConfigs });
+      return {
+        message: "Success.",
+        status: 200,
+        data: formattedAutomationConfigs,
+      };
+    }
+  } catch (error) {
+    console.error(error);
+    return { message: error.message || "Internal server error.", data: error };
+  }
+};
+
+// Parse stringed properties
+const formatAutomationConfigs = (automationConfigs) => {
+  let automationConfigsArray = automationConfigs;
+  if (!Array.isArray(automationConfigs)) {
+    automationConfigsArray = [automationConfigs];
+  }
+  return automationConfigsArray.map((automationConfig) => {
+    return {
+      ...automationConfig,
+      startLabels: safeJsonParse(automationConfig.startLabels, []),
+      endLabels: safeJsonParse(automationConfig.endLabels, null),
+      customDays: safeJsonParse(automationConfig.customDays, []),
+    };
+  });
+};
