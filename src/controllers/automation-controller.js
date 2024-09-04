@@ -1,7 +1,9 @@
 import {
-  createAutomatonService,
+  createAutomatonConfigService,
   fetchAutomationConfigService,
+  enableDisableAutomationService,
 } from "../services/automation-config-service.js";
+import { handleAutomationTriggerService } from "../services/item/automation-service.js";
 
 export const createAutomationConfigController = async (req, res) => {
   const { entryData } = req.body;
@@ -9,7 +11,7 @@ export const createAutomationConfigController = async (req, res) => {
     return res.status(400).json({ message: "No input data provided." });
   }
   try {
-    const result = await createAutomatonService(entryData);
+    const result = await createAutomatonConfigService(entryData);
     return res.status(201).json(result);
   } catch (error) {
     return res.status(error.status || 500).json({
@@ -51,5 +53,39 @@ export const fetchAutomationConfigController = async (req, res) => {
       message: error.message || "Internal server error.",
       data: error,
     });
+  }
+};
+
+export const enableDisableAutomationController = async (req, res) => {
+  const { id, action } = await req.body;
+  if (!id) {
+    return res.status(400).json({ message: "Invalid automation config id." });
+  } else if (typeof action !== "boolean") {
+    return res.status(400).json({ message: "Invalid action input." });
+  }
+  try {
+    const enableDisableAutomationServiceRes =
+      await enableDisableAutomationService(id, action);
+    return res
+      .status(enableDisableAutomationServiceRes.status)
+      .json(enableDisableAutomationServiceRes);
+  } catch (error) {
+    console.error(error);
+    return res.status(error.status || 500).json({
+      message: error.message || "Internal server error.",
+      data: error,
+    });
+  }
+};
+
+export const handleAutomationTrigger = async (req, res) => {
+  console.log("Automation triggered");
+  try {
+    const result = await handleAutomationTriggerService(req.body.payload);
+    return res.status(200).send({});
+    // }
+  } catch (error) {
+    console.error(error);
+    return res.status(200).send({});
   }
 };

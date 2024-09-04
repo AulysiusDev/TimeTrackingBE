@@ -229,7 +229,6 @@ export const fetchAccessKey = async (userId) => {
   }
   //   No access key provided
   const accessKey = creatorRes.data[0]?.accessKey;
-  console.log({ accessKey });
   if (!accessKey) {
     return {
       message: "Unauthorized",

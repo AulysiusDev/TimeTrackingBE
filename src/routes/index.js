@@ -5,11 +5,6 @@ import {
   fetchTimeEntriesController,
 } from "../controllers/common/entries-controller.js";
 import {
-  createLogConfigEntry,
-  getLogConfig,
-  startStopAutomation,
-} from "../controllers/item/log-config-controller.js";
-import {
   generateCsv,
   generateXlsx,
 } from "../controllers/item/export-controller.js";
@@ -22,6 +17,7 @@ import {
 import { createJWT, getAuthKey, saveAuthKey } from "../auth/oauth.js";
 import {
   createAutomationConfigController,
+  enableDisableAutomationController,
   fetchAutomationConfigController,
 } from "../controllers/automation-controller.js";
 
@@ -62,18 +58,21 @@ router.post(
   authorizeRegularRequest,
   fetchAutomationConfigController
 );
+router.post(
+  "/automate/enable-disable-automation",
+  authorizeRegularRequest,
+  enableDisableAutomationController
+);
 
 // Item routes
-// router.post("/start-stop-automation", startStopAutomation);
-// router.post("/fetch-item-settings", getLogConfig);
-// router.post("/create-log-config", createLogConfigEntry);
 router.post("/generate-xlsx", authorizeRegularRequest, generateXlsx);
 router.post("/generate-csv", authorizeRegularRequest, generateCsv);
-// router.post("/automation-triggered", authorizeRequest, handleAutomationTrigger);
+router.post(
+  "/automate/automation-triggered",
+  authorizeRequest,
+  handleAutomationTrigger
+);
 // router.post("/unsubscribe", authorizeRequest, unsubscribe);
 // router.post("/subscribe", authorizeRequest, subscribe);
-
-// // Object routes
-// router.post("/fetch-entries", authorizeRegularRequest, fetchEntries);
 
 export default router;

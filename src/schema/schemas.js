@@ -74,7 +74,7 @@ const AutomationConfigTable = pgTable("automationconfig", {
   active: boolean("active").default(false),
 });
 
-const AutomationConfigRealtions = relations(
+const AutomationConfigRelations = relations(
   AutomationConfigTable,
   ({ one }) => ({
     user: one(UsersTable, {
@@ -121,14 +121,14 @@ const logsRelations = relations(LogsTable, ({ many }) => ({
 export {
   UsersTable,
   AutomationConfigTable,
-  AutomationConfigRealtions,
+  AutomationConfigRelations,
   LogsTable,
   logsRelations,
 };
 const schema = {
   UsersTable,
   AutomationConfigTable,
-  AutomationConfigRealtions,
+  AutomationConfigRelations,
   LogsTable,
   logsRelations,
 };

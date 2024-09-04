@@ -101,3 +101,43 @@ export const findAutomationConfigs = async (
     };
   }
 };
+
+// So multiple updates are done at the same time
+
+// ERROR, NEON DOESN'T SUPPORT TRANSACTION, KEEP TO USE IF WE SWTCH TO AWS OR SOMTHING ELSE THAT DOE SUPPORT TRANSACTIONS
+export const updateMultipleFields = async (
+  schema,
+  schemaId,
+  updateObjsArr,
+  id
+) => {
+  try {
+    const db = await getDrizzleDbClient();
+    return await db.transaction(async (tx) => {
+      try {
+        const results = [];
+
+        for (const updateObj of updateObjsArr) {
+          const result = await tx
+            .update(schema)
+            .set(updateObj.values)
+            .where(eq(schemaId, id))
+            .returning({ updatedField: updateObj.field });
+          results.push(result);
+        }
+        return { message: "Success", status: 200, data: results };
+      } catch (error) {
+        console.error(error);
+        tx.rollback();
+        throw error;
+      }
+    });
+  } catch (error) {
+    console.error(error);
+    return {
+      message: error.message || "Error updating fields.",
+      status: error.status || 500,
+      data: error,
+    };
+  }
+};

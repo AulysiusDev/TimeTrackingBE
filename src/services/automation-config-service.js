@@ -1,5 +1,5 @@
 import { validateAndCreateUsers } from "./common/create-entries-service.js";
-import { createEntries, findById } from "./crud.js";
+import { createEntries, updateField } from "./crud.js";
 import { AutomationConfigTable } from "../schema/schemas.js";
 import { fetchAccessKey } from "../auth/oauth.js";
 import { cacheAccessKey } from "../auth/cache.js";
@@ -8,7 +8,7 @@ import { findAutomationConfigs } from "./advanced-crud.js";
 import { findItemGroupId } from "./monday-service.js";
 import { safeJsonParse } from "../helpers.js";
 
-export const createAutomatonService = async (entryData) => {
+export const createAutomatonConfigService = async (entryData) => {
   if (!entryData?.sessionToken) {
     return {
       message:
@@ -76,8 +76,8 @@ const createAutomationConfigObject = (entryData) => {
     startLabels: startLabelsArray,
     endLabels: endLabelsArray,
     rateCardId: entryData.rateCard.id || null,
-    ratePerHour: entryData.rateCard.rate,
-    currency: entryData.rateCard.currency?.value,
+    ratePerHour: entryData.rateCard.rate || null,
+    currency: entryData.rateCard.currency?.value || null,
     endTime: parseFloat(entryData.autoConfig.time.end?.value) || null,
     startTime: parseFloat(entryData.autoConfig.time.start?.value) || null,
     subitemId: entryData.item.subitemId?.id || null,
@@ -161,7 +161,6 @@ export const fetchAutomationConfigService = async (
       const formattedAutomationConfigs = formatAutomationConfigs(
         fetchAutomationConfigRes.data
       );
-      console.log({ formattedAutomationConfigs });
       return {
         message: "Success.",
         status: 200,
@@ -188,4 +187,53 @@ const formatAutomationConfigs = (automationConfigs) => {
       customDays: safeJsonParse(automationConfig.customDays, []),
     };
   });
+};
+
+export const enableDisableAutomationService = async (id, action) => {
+  console.log({ action });
+  try {
+    const enableDisableRes = await updateField(
+      AutomationConfigTable,
+      AutomationConfigTable.id,
+      AutomationConfigTable.active,
+      { active: action },
+      id
+    );
+    if (enableDisableRes.status === 200) {
+      const startDateRes = await updateField(
+        AutomationConfigTable,
+        AutomationConfigTable.id,
+        AutomationConfigTable.startDate,
+        { startDate: null },
+        id
+      );
+      if (startDateRes.status === 200) {
+        return {
+          message: "Fields updated successfully.",
+          status: 200,
+          data: [...startDateRes.data, ...enableDisableRes.data],
+        };
+      } else {
+        return {
+          message:
+            "Automation enabled/disbaled successfully, but failed to update start date.",
+          status: startDateRes.status,
+          data: startDateRes.data,
+        };
+      }
+    } else {
+      return {
+        message: "Failed to enable/disable automation.",
+        status: enableDisableRes.status,
+        data: enableDisableRes.data,
+      };
+    }
+  } catch (error) {
+    console.error(error);
+    return {
+      message: error.message || "Error updating fields.",
+      status: error.status || 500,
+      data: error,
+    };
+  }
 };

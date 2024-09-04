@@ -33,7 +33,6 @@ export const createDatesArray = (start, end, days = []) => {
     !validateDatesArray([new Date(end)]) ||
     startDate.getDate() === endDate.getDate()
   ) {
-    console.log("same day");
     return [startDate];
   }
   // Multi day
@@ -72,7 +71,6 @@ export const validateDatesArray = (dates) => {
 };
 
 export function calculateHours(logConfig, current) {
-  console.log({ logConfig });
   const currentDate = new Date(current);
   const endDate = new Date(logConfig.endDate);
   const startDate = new Date(logConfig.startDate);
@@ -91,19 +89,13 @@ export function calculateHours(logConfig, current) {
     endDate.getUTCDate() === startDate.getUTCDate() &&
     startDate.getUTCDate() === currentDate.getUTCDate()
   ) {
-    console.log("Same day");
     if (logConfig.schedule === 1) {
       endTime = Math.min(logConfig.endTime, endTime);
     }
-    console.log({ startTime });
-    console.log({ endTime });
-    console.log({ startMinusEnd: endTime - startTime });
-    console.log(Math.min(maxHours, endTime - startTime));
     return parseFloat(Math.min(maxHours, endTime - startTime).toFixed(2));
   }
 
   if (startDate.getUTCDate() === currentDate.getUTCDate()) {
-    console.log("Start day");
     return parseFloat(
       logConfig.endTime
         ? Math.min(maxHours, logConfig.endTime - startTime)
@@ -112,7 +104,6 @@ export function calculateHours(logConfig, current) {
   }
 
   if (endDate.getUTCDate() === currentDate.getUTCDate()) {
-    console.log("End day");
     startTime = logConfig.startTime;
     endTime =
       logConfig.schedule === 1 ? Math.min(logConfig.endTime, endTime) : endTime;

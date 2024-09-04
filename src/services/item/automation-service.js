@@ -202,18 +202,18 @@ export async function fetchUsers(itemId, peopleColumnId) {
   }
 }
 
-async function findCreatedAtStatusChange(
+const findCreatedAtStatusChange = async (
   boardId,
   columnId,
   itemId,
   currentValue
-) {
+) => {
   const monday = initMondayClient();
   monday.setToken(process.env.MONDAY_API_TOKEN);
   try {
     const query = `
       query($boardId: [ID!]) {
-  boards(ids: $boardId) {
+    boards(ids: $boardId) {
     activity_logs {
       created_at
       id
@@ -255,4 +255,4 @@ async function findCreatedAtStatusChange(
       data: error,
     };
   }
-}
+};

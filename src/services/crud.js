@@ -133,7 +133,7 @@ export async function updateField(
       .update(schema)
       .set(updateObj)
       .where(eq(schemaId, id))
-      .returning({ updatedField: schemaField });
+      .returning({ [Object.keys(updateObj)[0]]: schemaField });
     return { message: "Success", status: 200, data: updatedValue };
   } catch (error) {
     console.error(error);
