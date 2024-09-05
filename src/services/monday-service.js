@@ -81,7 +81,7 @@ export async function sendNotifications(userIds, creatorId, target, text) {
 }
 
 // Fins usernames for users
-export const findUsernames = async (userIds, creatorId) => {
+export const fetchUsernamesAndPhotoThumbs = async (userIds, creatorId) => {
   // Array needs to be passed to this query, sometimes try to find multiple also
   if (!Array.isArray(userIds)) {
     userIds = [userIds];
@@ -97,15 +97,20 @@ export const findUsernames = async (userIds, creatorId) => {
     const query = `query {
         users (ids: ${JSON.stringify(userIds)}) {
           id
-          name
+          name,
+          photo_thumb
         }
       }
       `;
     const response = await monday.api(query);
+    console.log({ response });
+    if (!response.data.users.length) {
+      return { message: "No users found.", status: 404, data: [] };
+    }
     return {
       message: "Successfully fetched usernames.",
       status: 200,
-      data: response,
+      data: response.data.users,
     };
   } catch (error) {
     console.error(error);

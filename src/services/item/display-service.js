@@ -1,4 +1,3 @@
-import initMondayClient from "monday-sdk-js";
 import { findById } from "../crud.js";
 import schemas from "../../schema/schemas.js";
 
@@ -85,14 +84,15 @@ export function sumHours(itemsLogs, subitemsLogs) {
   return { subitemBillable, subitemTotal, total, billable };
 }
 
-export async function addUsernames(logs) {
-  const mondayClient = initMondayClient();
-  mondayClient.setToken(process.env.MONDAY_API_TOKEN);
-  let usersArr;
-  // Remove dublicates
-  let uniqueUserIdsArr = createUniqueIdsArr(logs);
-  // Fetch names from monday api
+export async function addUsernames(uniqueUserIdsArr, userId) {
+  let usersArr = [];
   try {
+    const accessKey = getCachedAccessKey(userId);
+    if (!accessKey) {
+      return { message: "Unauthorized", status: 401, data: [] };
+    } else {
+      monday.setToken(accessKey);
+    }
     const query = `query {
         users (ids: ${JSON.stringify(uniqueUserIdsArr)}) {
           id
@@ -125,11 +125,12 @@ export async function addUsernames(logs) {
 }
 
 // Remove id dublicates
-export function createUniqueIdsArr(itemsLogs) {
-  const mondayClient = initMondayClient();
-  mondayClient.setToken(process.env.MONDAY_API_TOKEN);
+export function createUniqueIdsArr(logs) {
+  if (!Array.isArray(logs) || !logs.length) {
+    return [];
+  }
   const uniqueIdsArr = new Set();
-  for (const log of itemsLogs) {
+  for (const log of logs) {
     uniqueIdsArr.add(log.userId);
   }
   return Array.from(uniqueIdsArr);

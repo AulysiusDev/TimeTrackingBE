@@ -37,16 +37,23 @@ export const getAuthKey = async (req, res) => {
 
 // Auth callback function once user has authenticated app permissions
 export const saveAuthKey = async (req, res) => {
-  const { code, state } = req.query;
+  const { code, state, token } = req.query;
   //   Unlock state token to gets params (request origin validation) and user details
-  const token = jwt.verify(state, process.env.CLIENT_SECRET);
+  const tokenRes = jwt.verify(state, process.env.CLIENT_SECRET);
 
   //   Invalid request params
-  if (token.client_id !== process.env.CLIENT_ID || !code || !token.user_id) {
+  if (
+    tokenRes.client_id !== process.env.CLIENT_ID ||
+    !code ||
+    !tokenRes.user_id
+  ) {
     return res.status(403).json({ message: "Invalid request." });
   }
   //   Get access key from monday api, save in UsersTable db
-  const fetchSaveAccessKeyRes = await fetchSaveAccessKey(code, token.user_id);
+  const fetchSaveAccessKeyRes = await fetchSaveAccessKey(
+    code,
+    tokenRes.user_id
+  );
   //   Failed to save
   if (
     fetchSaveAccessKeyRes.status !== 200 &&

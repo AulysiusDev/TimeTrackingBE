@@ -1,11 +1,14 @@
 import { createTimeEntriesService } from "../../services/common/create-entries-service.js";
 import {
+  addUsernamesAndPhotoThumbs,
   calculateDataPoints,
   fetchEntriesService,
-  filterLogConfigDEntries,
+  filterAutoConfigEntries,
 } from "../../services/common/fetch-entries-service.js";
 import { deleteByIds } from "../../services/crud.js";
 import schemas from "../../schema/schemas.js";
+import { fetchAccessKey } from "../../auth/oauth.js";
+import { cacheAccessKey } from "../../auth/cache.js";
 
 // Handle requests to create time entries
 export async function createTimeEntriesController(req, res) {
@@ -34,28 +37,43 @@ export async function fetchTimeEntriesController(req, res) {
   // Filters MUST INCLUDE these 3 params min:
   // targetName, tableName, targetType (must be string: group, item, board or workspace)
   const { filters } = req.body;
-  if (!filters) {
+  if (!filters || !filters.creatorId) {
     return res.status(400).json({
-      message: "Invalid inputs, target id and target type",
+      message: "Invalid inputs.",
       data: [],
     });
   }
   try {
+    //  Cache access key
+    const accessKeyRes = await fetchAccessKey(filters.creatorId);
+    if (accessKeyRes.status === 401) {
+      return accessKeyRes;
+    }
+    cacheAccessKey(filters.creatorId, accessKeyRes.data);
     const fetchEntriesRes = await fetchEntriesService(filters);
+    console.log({ fetchEntriesRes });
     if (fetchEntriesRes.status !== 200) {
       return res.status(fetchEntriesRes.status).json(fetchEntriesRes);
     }
     if (fetchEntriesRes.data.length) {
       const { tableName, targetType } = filters;
-
       switch (tableName) {
         case "logs":
-          const metrics = calculateDataPoints(fetchEntriesRes.data, targetType);
+          const addUsernamesAndPhotoThumbsRes =
+            await addUsernamesAndPhotoThumbs(
+              fetchEntriesRes.data,
+              filters.creatorId
+            );
+          let metrics;
+          metrics = calculateDataPoints(
+            addUsernamesAndPhotoThumbsRes.data,
+            targetType
+          );
+
           return res.status(200).json({
             message: "Success",
             data: metrics,
           });
-
         case "users":
           return res.status(200).json({
             message: "Success",
@@ -63,7 +81,7 @@ export async function fetchTimeEntriesController(req, res) {
           });
 
         case "logConfigs":
-          const filteredLogConfigDEntries = filterLogConfigDEntries(
+          const filteredLogConfigDEntries = filterAutoConfigEntries(
             fetchEntriesRes.data,
             filters.targetId
           );

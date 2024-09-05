@@ -7,19 +7,14 @@ import {
 import { createDatesArray, validateDatesArray } from "../../helpers.js";
 import schemas from "../../schema/schemas.js";
 import { createEntries, findById, findInArray } from "../crud.js";
-import { findUsernames, sendNotifications } from "../monday-service.js";
+import {
+  fetchUsernamesAndPhotoThumbs,
+  sendNotifications,
+} from "../monday-service.js";
 import { cacheAccessKey } from "../../auth/cache.js";
 
 // Root function, creates time logs from input data, across a period and for multiple users if selected
 export async function createTimeEntriesService(entryData) {
-  if (!entryData?.sessionToken) {
-    return {
-      message:
-        "No session token present in this request for authorization. Please reload the app and contact developers if this error persists.",
-      status: 403,
-      data: [],
-    };
-  }
   // Validate user objects and create them in db if not already, this is so rate crads can be created etc.
   const validatedUsersRes = await validateAndCreateUsers(entryData);
   if (validatedUsersRes.status === 500 || validatedUsersRes.status === 400) {
@@ -92,7 +87,7 @@ export async function createTimeEntriesService(entryData) {
         ).getDate()}`;
 
   // Send notificatio with creator's name, or id if not found.
-  const usernamesRes = await findUsernames(
+  const usernamesRes = await fetchUsernamesAndPhotoThumbs(
     entryData.user.creatorId,
     entryData.user.creatorId
   );

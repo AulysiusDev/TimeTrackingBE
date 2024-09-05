@@ -5,6 +5,7 @@ import {
   UsersTable,
 } from "../../schema/schemas.js";
 import { getDrizzleDbClient } from "../db-client.js";
+import { fetchUsernamesAndPhotoThumbs } from "../monday-service.js";
 
 // Will fetch data from any table with nay filters
 // NEED: targetName, tableName, targetType (must be string: group, item, board or workspace)
@@ -21,7 +22,7 @@ export const fetchEntriesService = async (filters = {}) => {
     team,
     groupId,
   } = filters;
-
+  console.log({ filters });
   //   Invalid input, need a table to fetch from.
   if (!tableName) {
     return { message: "No table specified.", status: 400, data: [] };
@@ -31,7 +32,7 @@ export const fetchEntriesService = async (filters = {}) => {
   const tableMapping = {
     users: UsersTable,
     logs: LogsTable,
-    logConfig: AutomationConfigTable,
+    autoConfig: AutomationConfigTable,
   };
   const table = tableMapping[tableName.toLowerCase()];
   // Ensure table exists
@@ -47,7 +48,6 @@ export const fetchEntriesService = async (filters = {}) => {
     query = query.leftJoin(UsersTable, eq(table.userId, UsersTable.id));
   }
   const conditions = [];
-
   if (userId) {
     if (tableName === "users") {
       conditions.push(eq(table.id, userId));
@@ -65,7 +65,7 @@ export const fetchEntriesService = async (filters = {}) => {
   if (boardId) conditions.push(eq(table.boardId, boardId));
   if (groupId) conditions.push(eq(table.groupId, groupId));
 
-  //   Let requests fetch logs or logConfigs for specific targets
+  //   Let requests fetch logs or autoConfigs for specific targets
   //   ...allows creating logs are targets other than just items
 
   // Handles request for logs specific to the tables below
@@ -90,6 +90,7 @@ export const fetchEntriesService = async (filters = {}) => {
   }
   try {
     const results = await query.execute();
+    console.log({ results });
     if (results.length > 0) {
       return {
         message: `Successfully fetched ${results.length} entries from ${tableName} table.`,
@@ -156,7 +157,6 @@ export const calculateDataPoints = (fetchedLogs, targetType) => {
       billable += parseFloat(log.billableHours);
     }
   });
-  console.log({ itemLogs });
   return {
     logs,
     itemLogs,
@@ -168,16 +168,72 @@ export const calculateDataPoints = (fetchedLogs, targetType) => {
   };
 };
 
+export const addUsernamesAndPhotoThumbs = async (logs, userId) => {
+  const uniqueIdsArr = createUniqueIdsArr(logs);
+  const addUsernamesAndPhotoThumbsRes = await addUsernamesWithPhotoThumbs(
+    uniqueIdsArr,
+    logs,
+    userId
+  );
+  return addUsernamesAndPhotoThumbsRes;
+};
+
+// Remove id dublicates
+export const createUniqueIdsArr = (logs) => {
+  if (!Array.isArray(logs) || !logs.length) {
+    return [];
+  }
+  const uniqueIdsArr = new Set();
+  for (const log of logs) {
+    uniqueIdsArr.add(log.userId);
+  }
+  return Array.from(uniqueIdsArr);
+};
+
+export const addUsernamesWithPhotoThumbs = async (
+  uniqueUserIdsArr,
+  logs,
+  userId
+) => {
+  const namesPhotosRes = await fetchUsernamesAndPhotoThumbs(
+    uniqueUserIdsArr,
+    userId
+  );
+  if (namesPhotosRes.status !== 200) {
+    const logsWithoutUserData = logs.map((log) => {
+      log.name = null;
+      log.photoThumb = null;
+      return log;
+    });
+    return {
+      message: "Failed to add names and photothumbs.",
+      status: namesPhotosRes.status,
+      data: logsWithoutUserData,
+    };
+  }
+  // Add usernames to logs
+  for (let user of namesPhotosRes.data) {
+    const userId = parseInt(user.id);
+    logs.forEach((log) => {
+      if (log.userId === userId) {
+        log.username = user.name;
+        log.photoThumb = user.photo_thumb;
+      }
+    });
+  }
+  return { message: "Success fetching usernames", status: 200, data: logs };
+};
+
 // Filters logs based on the target
-export const filterLogConfigDEntries = (logs, targetId) => {
+export const filterAutoConfigEntries = (autoConfigs, targetId) => {
   return (
-    logs.filter(
-      (logConfig) =>
-        JSON.stringify(logConfig.userId) === JSON.stringify(targetId) ||
-        JSON.stringify(logConfig.groupId) === JSON.stringify(targetId) ||
-        JSON.stringify(logConfig.boardId) === JSON.stringify(targetId) ||
-        JSON.stringify(logConfig.workspaceId) === JSON.stringify(targetId) ||
-        JSON.stringify(logConfig.itemId) === JSON.stringify(targetId)
+    autoConfigs.filter(
+      (autoConfig) =>
+        JSON.stringify(autoConfig.userId) === JSON.stringify(targetId) ||
+        JSON.stringify(autoConfig.groupId) === JSON.stringify(targetId) ||
+        JSON.stringify(autoConfig.boardId) === JSON.stringify(targetId) ||
+        JSON.stringify(autoConfig.workspaceId) === JSON.stringify(targetId) ||
+        JSON.stringify(autoConfig.itemId) === JSON.stringify(targetId)
     ) || []
   );
 };

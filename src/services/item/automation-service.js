@@ -72,12 +72,10 @@ export async function handleAutomationTriggerService(payload) {
   }
   // Create entry log and reset start date to null
   if (createLog === true) {
-    console.log("Creating log");
     logConfigRes.data.endDate = changedAt.data
       ? new Date(changedAt.data)
       : new Date(Date.now());
     const datesArr = createDatesArray(logConfigRes.data);
-    console.log({ datesArr });
     for (const date of datesArr) {
       const hours = parseFloat(
         calculateHours(logConfigRes.data, date).toFixed(2)
@@ -97,6 +95,19 @@ export async function handleAutomationTriggerService(payload) {
         itemId: logConfigRes.data.itemId,
       });
     }
+    if (response.status !== 201) {
+      const notificationText = `There was an error creating a log from an automation.`;
+      await sendNotifications(
+        logConfigRes.data.userId,
+        itemId,
+        notificationText
+      );
+      return {
+        message: response.message || "Unknown error creating entries.",
+        status: response.status || 500,
+        data: response.data || [],
+      };
+    }
 
     const notificationText = `A new log entry has been created for you on item-${itemId}`;
     await sendNotifications(
@@ -113,10 +124,18 @@ export async function handleAutomationTriggerService(payload) {
       logConfigRes.data.id
     );
   }
-
+  if (response.status !== 200) {
+    const notificationText = `There was an error updating the automation config.`;
+    await sendNotifications(logConfigRes.data.userId, itemId, notificationText);
+    return {
+      message: response.message || "Unknown error updating automation config.",
+      status: response.status || 500,
+      data: response.data || [],
+    };
+  }
   return {
     status: 200,
-    data: null,
+    data: [],
     message: "Successfull creation of entry log",
   };
 }
