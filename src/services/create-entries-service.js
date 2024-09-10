@@ -1,17 +1,13 @@
-import { fetchAccessKey } from "../../auth/oauth.js";
-import {
-  validateItem,
-  validateLog,
-  validateUser,
-} from "../../db/validators.js";
-import { createDatesArray, validateDatesArray } from "../../helpers.js";
-import schemas from "../../schema/schemas.js";
-import { createEntries, findById, findInArray } from "../crud.js";
+import { fetchAccessKey } from "../auth/oauth.js";
+import { validateItem, validateLog, validateUser } from "../db/validators.js";
+import { createDatesArray, validateDatesArray } from "../helpers.js";
+import { createEntries, findById, findInArray } from "./crud.js";
 import {
   fetchUsernamesAndPhotoThumbs,
   sendNotifications,
-} from "../monday-service.js";
-import { cacheAccessKey } from "../../auth/cache.js";
+} from "./monday-service.js";
+import { cacheAccessKey } from "../auth/cache.js";
+import { LogsTable, UsersTable } from "../schema/schemas.js";
 
 // Root function, creates time logs from input data, across a period and for multiple users if selected
 export async function createTimeEntriesService(entryData) {
@@ -130,7 +126,9 @@ export async function createTimeEntriesService(entryData) {
 export async function validateAndCreateUsers(entryData) {
   // Create array of ids for validation
   let userIds = entryData.user.ids.map((user) => user.id) || [];
-  userIds = [...userIds, entryData.user.creatorId];
+  if (!userIds.includes(entryData.user.creatorId)) {
+    userIds = [...userIds, entryData.user.creatorId];
+  }
   if (!userIds.length) {
     return { message: "No users to validate.", status: 400, data: [] };
   }
@@ -177,8 +175,8 @@ export async function validateAndCreateUsers(entryData) {
       try {
         // Find users who are in db - UsersTable
         const users = await findInArray(
-          schemas.UsersTable,
-          schemas.UsersTable.id,
+          UsersTable,
+          UsersTable.id,
           validatedUsers.map((userObj) => userObj.id)
         );
         let usersToCreate = [];
@@ -198,7 +196,7 @@ export async function validateAndCreateUsers(entryData) {
         }
         // Create users which are not present in db - UsersTable
         if (usersToCreate.length) {
-          const res = await createEntries(schemas.UsersTable, usersToCreate);
+          const res = await createEntries(UsersTable, usersToCreate);
           if (res.status === 500) {
             return {
               message: "There was an error creating user entries",
@@ -232,6 +230,8 @@ export async function validateAndCreateUsers(entryData) {
 export async function validateAndCreateLogs(entryData, dates) {
   let validatedLogs = [];
   const logsArray = createLogsArray(entryData, dates);
+  console.log({ length: logsArray.length });
+
   // Validate all logs
   for (const log of logsArray) {
     const { data, hasError, message } = await validateLog(log);
@@ -255,7 +255,7 @@ export async function validateAndCreateLogs(entryData, dates) {
 
   try {
     // Create entries in db
-    const newLogEntries = await createEntries(schemas.LogsTable, validatedLogs);
+    const newLogEntries = await createEntries(LogsTable, validatedLogs);
     return newLogEntries;
   } catch (error) {
     console.error(error);
@@ -269,6 +269,7 @@ export async function validateAndCreateLogs(entryData, dates) {
 
 // Create array of all logs for each date and each user id., with valid types and structure
 export const createLogsArray = (entryData, dates) => {
+  console.dir({ entryData }, { depth: null });
   const logsArray = entryData.user.ids.flatMap((userId) =>
     dates.map((date) => {
       const logObj = {
@@ -315,11 +316,7 @@ export async function validateAndCreateItem(entryData) {
   let errorMessage = `${isSubitem ? "Subitem" : "Item"} entry already exists`;
   let itemExists = false;
   try {
-    checkItemExists = await findById(
-      schemas.ItemsTable,
-      schemas.ItemsTable.id,
-      id
-    );
+    checkItemExists = await findById(ItemsTable, ItemsTable.id, id);
   } catch (error) {
     return { message: errorMessage, data: error, status: 500 };
   }
@@ -351,7 +348,7 @@ export async function validateAndCreateItem(entryData) {
   }
   // Create entry in ItemsTable
   try {
-    const newItem = await createEntries(schemas.ItemsTable, data);
+    const newItem = await createEntries(ItemsTable, data);
     return {
       message: "New item entry created and data validated.",
       data: newItem.data,

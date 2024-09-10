@@ -1,4 +1,4 @@
-CREATE TABLE IF NOT EXISTS "logconfig" (
+CREATE TABLE IF NOT EXISTS "automationconfig" (
 	"id" serial PRIMARY KEY NOT NULL,
 	"user_id" integer NOT NULL,
 	"item_id" text,
@@ -21,6 +21,7 @@ CREATE TABLE IF NOT EXISTS "logconfig" (
 	"hours" numeric(8, 2),
 	"name" text,
 	"rate_card_id" integer,
+	"category" text DEFAULT 'NB' NOT NULL,
 	"rate_per_hour" numeric(8, 2),
 	"currency" text DEFAULT 'USD',
 	"active" boolean DEFAULT false
@@ -58,13 +59,13 @@ CREATE TABLE IF NOT EXISTS "users" (
 );
 --> statement-breakpoint
 DO $$ BEGIN
- ALTER TABLE "logconfig" ADD CONSTRAINT "logconfig_user_id_users_id_fk" FOREIGN KEY ("user_id") REFERENCES "users"("id") ON DELETE no action ON UPDATE no action;
+ ALTER TABLE "automationconfig" ADD CONSTRAINT "automationconfig_user_id_users_id_fk" FOREIGN KEY ("user_id") REFERENCES "users"("id") ON DELETE no action ON UPDATE no action;
 EXCEPTION
  WHEN duplicate_object THEN null;
 END $$;
 --> statement-breakpoint
 DO $$ BEGIN
- ALTER TABLE "logconfig" ADD CONSTRAINT "logconfig_rate_card_id_users_id_fk" FOREIGN KEY ("rate_card_id") REFERENCES "users"("id") ON DELETE no action ON UPDATE no action;
+ ALTER TABLE "automationconfig" ADD CONSTRAINT "automationconfig_rate_card_id_users_id_fk" FOREIGN KEY ("rate_card_id") REFERENCES "users"("id") ON DELETE no action ON UPDATE no action;
 EXCEPTION
  WHEN duplicate_object THEN null;
 END $$;

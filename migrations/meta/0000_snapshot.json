@@ -1,11 +1,11 @@
 {
-  "id": "b3283090-4cd2-468f-9a2d-3c0d59066596",
+  "id": "ddb1c5e1-080e-406c-9bcc-4aeaadf7cef4",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "5",
   "dialect": "pg",
   "tables": {
-    "logconfig": {
-      "name": "logconfig",
+    "automationconfig": {
+      "name": "automationconfig",
       "schema": "",
       "columns": {
         "id": {
@@ -148,6 +148,13 @@
           "primaryKey": false,
           "notNull": false
         },
+        "category": {
+          "name": "category",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'NB'"
+        },
         "rate_per_hour": {
           "name": "rate_per_hour",
           "type": "numeric(8, 2)",
@@ -171,9 +178,9 @@
       },
       "indexes": {},
       "foreignKeys": {
-        "logconfig_user_id_users_id_fk": {
-          "name": "logconfig_user_id_users_id_fk",
-          "tableFrom": "logconfig",
+        "automationconfig_user_id_users_id_fk": {
+          "name": "automationconfig_user_id_users_id_fk",
+          "tableFrom": "automationconfig",
           "tableTo": "users",
           "columnsFrom": [
             "user_id"
@@ -184,9 +191,9 @@
           "onDelete": "no action",
           "onUpdate": "no action"
         },
-        "logconfig_rate_card_id_users_id_fk": {
-          "name": "logconfig_rate_card_id_users_id_fk",
-          "tableFrom": "logconfig",
+        "automationconfig_rate_card_id_users_id_fk": {
+          "name": "automationconfig_rate_card_id_users_id_fk",
+          "tableFrom": "automationconfig",
           "tableTo": "users",
           "columnsFrom": [
             "rate_card_id"

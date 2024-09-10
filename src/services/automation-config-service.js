@@ -1,4 +1,3 @@
-import { validateAndCreateUsers } from "./common/create-entries-service.js";
 import { createEntries, updateField } from "./crud.js";
 import { AutomationConfigTable } from "../schema/schemas.js";
 import { fetchAccessKey } from "../auth/oauth.js";
@@ -7,6 +6,7 @@ import { validateAutomationConfig } from "../db/validators.js";
 import { findAutomationConfigs } from "./advanced-crud.js";
 import { findItemGroupId } from "./monday-service.js";
 import { safeJsonParse } from "../helpers.js";
+import { validateAndCreateUsers } from "./create-entries-service.js";
 
 export const createAutomatonConfigService = async (entryData) => {
   if (!entryData?.sessionToken) {
@@ -59,6 +59,7 @@ const createAutomationConfigObject = (entryData) => {
   const endLabelsArray = entryData.autoConfig.labels.end.map(
     (label) => label.hex
   );
+  console.dir({ entryData }, { depth: null });
   return {
     name: entryData.log.name,
     workspaceId: entryData.item.workspaceId,
@@ -83,6 +84,7 @@ const createAutomationConfigObject = (entryData) => {
     subitemId: entryData.item.subitemId?.id || null,
     active: true,
     hours: entryData.autoConfig.time.hours,
+    category: entryData.log.category.value === "2" ? "NB" : "B",
   };
 };
 
@@ -139,7 +141,7 @@ export const fetchAutomationConfigService = async (
     // ... even though the itemId won't be present on the automation, but the group id will be
     let groupId = null;
     if (itemId) {
-      const findItemGroupIdRes = await findItemGroupId(boardId, itemId, id);
+      const findItemGroupIdRes = await findItemGroupId(itemId, id);
       if (findItemGroupIdRes.status === 400) {
         return findItemGroupIdRes;
       } else {
@@ -147,11 +149,12 @@ export const fetchAutomationConfigService = async (
       }
     }
     // Reques is for board wide automations
-    const fetchAutomationConfigRes = await findAutomationConfigs(
+    const fetchAutomationConfigRes = await findAutomationConfigs({
       boardId,
-      groupId,
-      itemId || null
-    );
+      groupId: groupId || null,
+      itemId: itemId || null,
+      columnId: null,
+    });
     if (
       Array.isArray(fetchAutomationConfigRes) &&
       fetchAutomationConfigRes.data.length <= 0
@@ -190,7 +193,6 @@ const formatAutomationConfigs = (automationConfigs) => {
 };
 
 export const enableDisableAutomationService = async (id, action) => {
-  console.log({ action });
   try {
     const enableDisableRes = await updateField(
       AutomationConfigTable,

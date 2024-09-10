@@ -3,23 +3,21 @@ import {
   createTimeEntriesController,
   deleteEntriesController,
   fetchTimeEntriesController,
-} from "../controllers/common/entries-controller.js";
+} from "../controllers/entries-controller.js";
 import {
   generateCsv,
   generateXlsx,
 } from "../controllers/item/export-controller.js";
 import { authorizeRegularRequest, authorizeRequest } from "../middleware.js";
-import {
-  handleAutomationTrigger,
-  subscribe,
-  unsubscribe,
-} from "../controllers/item/automation-trigger-controller.js";
 import { createJWT, getAuthKey, saveAuthKey } from "../auth/oauth.js";
 import {
   createAutomationConfigController,
   enableDisableAutomationController,
   fetchAutomationConfigController,
+  subscribeController,
+  unsubscribeController,
 } from "../controllers/automation-controller.js";
+import { handleAutomationTriggerController } from "../controllers/automation-controller.js";
 
 const router = express.Router();
 
@@ -70,9 +68,9 @@ router.post("/generate-csv", authorizeRegularRequest, generateCsv);
 router.post(
   "/automate/automation-triggered",
   authorizeRequest,
-  handleAutomationTrigger
+  handleAutomationTriggerController
 );
-// router.post("/unsubscribe", authorizeRequest, unsubscribe);
-// router.post("/subscribe", authorizeRequest, subscribe);
+router.post("/unsubscribe", authorizeRequest, unsubscribeController);
+router.post("/subscribe", authorizeRequest, subscribeController);
 
 export default router;

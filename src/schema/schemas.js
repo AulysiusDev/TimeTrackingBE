@@ -68,6 +68,7 @@ const AutomationConfigTable = pgTable("automationconfig", {
   rateCardId: integer("rate_card_id").references(() => UsersTable.id, {
     relationName: "rateCard",
   }),
+  category: text("category").default("NB").notNull(),
   // Can be set, can be null, anc can use rate card instead
   ratePerHour: numeric("rate_per_hour", { precision: 8, scale: 2 }),
   currency: text("currency").default("USD"),

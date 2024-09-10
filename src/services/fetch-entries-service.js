@@ -3,9 +3,10 @@ import {
   AutomationConfigTable,
   LogsTable,
   UsersTable,
-} from "../../schema/schemas.js";
-import { getDrizzleDbClient } from "../db-client.js";
-import { fetchUsernamesAndPhotoThumbs } from "../monday-service.js";
+} from "../schema/schemas.js";
+import { getDrizzleDbClient } from "./db-client.js";
+import { fetchUsernamesAndPhotoThumbs } from "./monday-service.js";
+import { createUniqueIdsArr } from "../helpers.js";
 
 // Will fetch data from any table with nay filters
 // NEED: targetName, tableName, targetType (must be string: group, item, board or workspace)
@@ -22,7 +23,6 @@ export const fetchEntriesService = async (filters = {}) => {
     team,
     groupId,
   } = filters;
-  console.log({ filters });
   //   Invalid input, need a table to fetch from.
   if (!tableName) {
     return { message: "No table specified.", status: 400, data: [] };
@@ -90,10 +90,11 @@ export const fetchEntriesService = async (filters = {}) => {
   }
   try {
     const results = await query.execute();
-    console.log({ results });
     if (results.length > 0) {
       return {
-        message: `Successfully fetched ${results.length} entries from ${tableName} table.`,
+        message: `Successfully fetched ${results.length} entr${
+          results.length === 1 ? "y" : "ries"
+        } from ${tableName} table.`,
         status: 200,
         data: results,
       };
@@ -176,18 +177,6 @@ export const addUsernamesAndPhotoThumbs = async (logs, userId) => {
     userId
   );
   return addUsernamesAndPhotoThumbsRes;
-};
-
-// Remove id dublicates
-export const createUniqueIdsArr = (logs) => {
-  if (!Array.isArray(logs) || !logs.length) {
-    return [];
-  }
-  const uniqueIdsArr = new Set();
-  for (const log of logs) {
-    uniqueIdsArr.add(log.userId);
-  }
-  return Array.from(uniqueIdsArr);
 };
 
 export const addUsernamesWithPhotoThumbs = async (

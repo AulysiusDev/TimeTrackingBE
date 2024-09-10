@@ -55,7 +55,6 @@ export async function validateItem(itemData) {
 }
 
 export async function validateLog(logData) {
-  console.log({ logData });
   const log = z.object({
     userId: z.number(),
     itemId: z.string().nullable(),
@@ -116,6 +115,7 @@ export async function validateAutomationConfig(logConfigData) {
     subitemId: z.number().nullable(),
     active: z.boolean(),
     hours: z.number().nullable(),
+    category: z.string(),
   });
   let hasError;
   let validLogConfigData = {};
@@ -135,3 +135,35 @@ export async function validateAutomationConfig(logConfigData) {
     message: "",
   };
 }
+
+export const validateAutoConfigDetails = (autoConfig) => {
+  console.dir({ autoConfig }, { depth: null });
+  if (autoConfig.schedule === 0) {
+    if (
+      !autoConfig.startTime ||
+      !autoConfig.hours ||
+      (!autoConfig.startTime && !autoConfig.hours)
+    ) {
+      return {
+        message: "No start time or hours configured on automation config.",
+        status: 400,
+        data: autoConfig,
+      };
+    } else {
+      // No people column or rate card registered, so use creator id to log against
+      if (
+        !autoConfig.peopleColumnId &&
+        !autoConfig.rateCardId &&
+        autoConfig.userId
+      ) {
+        autoConfig = { ...autoConfig, usersIds: [autoConfig.userId] };
+      } else if (autoConfig.peopleColumnId) {
+        return {
+          message: "People columns selected",
+          status: 200,
+          data: autoConfig,
+        };
+      }
+    }
+  }
+};

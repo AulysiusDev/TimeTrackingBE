@@ -1,27 +1,6 @@
 import initMondayClient from "monday-sdk-js";
-import { fetchAuthToken, getAndSetAccessKey } from "../auth/oauth.js";
 import { getCachedAccessKey } from "../auth/cache.js";
 const monday = initMondayClient();
-
-// // Fetch item names as only id saved (target name saved now, is this function neccessary?!)
-// export async function fetchItemName(id, creatorId) {
-//   try {
-//     const authorized = await getAndSetAccessKey(creatorId);
-//     if (!authorized) {
-//       return { message: "Unauthorized", status: 401, data: [] };
-//     }
-//     const query = `query{
-//       items(ids: [${id}]){
-//         name
-//       }
-//     }`;
-//     const response = await monday.api(query);
-//     return response;
-//   } catch (error) {
-//     console.error(error);
-//     return "Could not locate item id";
-//   }
-// }
 
 // Send a notification to a user. (target is the id of the thing updating about)
 export async function sendNotifications(userIds, creatorId, target, text) {
@@ -103,7 +82,6 @@ export const fetchUsernamesAndPhotoThumbs = async (userIds, creatorId) => {
       }
       `;
     const response = await monday.api(query);
-    console.log({ response });
     if (!response.data.users.length) {
       return { message: "No users found.", status: 404, data: [] };
     }
@@ -122,7 +100,7 @@ export const fetchUsernamesAndPhotoThumbs = async (userIds, creatorId) => {
   }
 };
 
-export const findItemGroupId = async (boardId, itemId, id) => {
+export const findItemGroupId = async (itemId, id) => {
   // Get api key
   const accessKey = getCachedAccessKey(id);
   if (!accessKey) {
@@ -163,6 +141,109 @@ export const findItemGroupId = async (boardId, itemId, id) => {
     return {
       message: error.message || "Internal server error.",
       status: error.status || 500,
+      data: error,
+    };
+  }
+};
+
+export const findCreatedAtStatusChange = async (
+  boardId,
+  columnId,
+  itemId,
+  currentValue,
+  userId
+) => {
+  // Get api key
+  const accessKey = getCachedAccessKey(userId);
+  if (!accessKey) {
+    return { message: "Unauthorized", status: 401, data: [] };
+  } else {
+    monday.setToken(accessKey);
+  }
+  try {
+    const query = `
+      query($boardId: [ID!]) {
+    boards(ids: $boardId) {
+    activity_logs {
+      created_at
+      id
+      event
+      data
+    }
+  }
+}
+      `;
+    const variables = {
+      boardId: [boardId],
+    };
+    const res = await monday.api(query, { variables });
+    const columnChangeUpdates = res.data.boards[0].activity_logs.filter(
+      (log) => {
+        const logData = JSON.parse(log.data);
+        if (
+          log.event === "update_column_value" &&
+          logData.pulse_id === itemId &&
+          logData.column_id === columnId &&
+          logData.value.label.index === currentValue.label.index
+        ) {
+          return true;
+        }
+        return false;
+      }
+    );
+    let myDate = new Date(columnChangeUpdates[0].created_at / 10000);
+    return {
+      message: "Success",
+      status: 200,
+      data: myDate ? myDate : new Date(),
+    };
+  } catch (error) {
+    console.error(error);
+    return {
+      message: error.message || "Unknown error finding status update.",
+      status: error.status || 500,
+      data: error,
+    };
+  }
+};
+
+// Fetches all the user data for users assigned to the people column
+export const fetchUsers = async (itemId, peopleColumnId, id) => {
+  // Get api key
+  const accessKey = getCachedAccessKey(id);
+  if (!accessKey) {
+    return { message: "Unauthorized", status: 401, data: [] };
+  } else {
+    monday.setToken(accessKey);
+  }
+  try {
+    const query = `
+    query ($itemId: ID!, $peopleColumnId: String!) {
+      items(ids: [$itemId]){
+        column_values(ids: [$peopleColumnId]){
+          id 
+          value
+        }
+      }
+    }
+    `;
+    const variables = {
+      itemId: itemId,
+      peopleColumnId: peopleColumnId,
+    };
+    const res = await monday.api(query, { variables });
+    const parsedValue = JSON.parse(res.data.items[0].column_values[0].value);
+    // If there are no users asigned to the user column then lets see, use rate card id and if none then well
+    return {
+      message: "Success fetching users",
+      status: 200,
+      data: parsedValue?.personsAndTeams || [],
+    };
+  } catch (error) {
+    console.error(error);
+    return {
+      message: "Error fetching users",
+      status: 500,
       data: error,
     };
   }

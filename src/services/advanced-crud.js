@@ -53,11 +53,8 @@ export async function findLogs(params) {
   }
 }
 
-export const findAutomationConfigs = async (
-  boardId,
-  groupId = null,
-  itemId = null
-) => {
+export const findAutomationConfigs = async (filters) => {
+  const { boardId, groupId = null, itemId = null, columnId = null } = filters;
   try {
     const db = await getDrizzleDbClient();
     let query = db.select().from(AutomationConfigTable);
@@ -74,6 +71,9 @@ export const findAutomationConfigs = async (
     }
     if (groupId) {
       conditions.push(eq(AutomationConfigTable.groupId, groupId));
+    }
+    if (columnId) {
+      conditions.push(eq(AutomationConfigTable.statusColumnId, columnId));
     }
     if (conditions.length > 0) {
       query = query.where(...conditions);

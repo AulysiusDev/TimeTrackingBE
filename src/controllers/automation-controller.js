@@ -3,7 +3,7 @@ import {
   fetchAutomationConfigService,
   enableDisableAutomationService,
 } from "../services/automation-config-service.js";
-import { handleAutomationTriggerService } from "../services/item/automation-service.js";
+import { handleAutomationTriggerService } from "../services/automation-trigger-service.js";
 
 export const createAutomationConfigController = async (req, res) => {
   const { entryData } = req.body;
@@ -78,14 +78,25 @@ export const enableDisableAutomationController = async (req, res) => {
   }
 };
 
-export const handleAutomationTrigger = async (req, res) => {
+export const handleAutomationTriggerController = async (req, res) => {
   console.log("Automation triggered");
   try {
     const result = await handleAutomationTriggerService(req.body.payload);
     return res.status(200).send({});
-    // }
   } catch (error) {
     console.error(error);
     return res.status(200).send({});
   }
 };
+
+export async function subscribeController(req, res) {
+  // console.log({ body: req.body });
+  console.log("subscribed");
+  res.status(200).send({});
+}
+
+export async function unsubscribeController(req, res) {
+  // console.log({ body: req.body });
+  console.log("unsubscribed");
+  res.status(200).send({});
+}

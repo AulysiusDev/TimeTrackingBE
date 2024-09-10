@@ -1,14 +1,15 @@
-import { createTimeEntriesService } from "../../services/common/create-entries-service.js";
+import { deleteByIds } from "../services/crud.js";
+import schemas from "../schema/schemas.js";
+import { fetchAccessKey } from "../auth/oauth.js";
+import { cacheAccessKey } from "../auth/cache.js";
+
+import { createTimeEntriesService } from "../services/create-entries-service.js";
 import {
   addUsernamesAndPhotoThumbs,
   calculateDataPoints,
   fetchEntriesService,
   filterAutoConfigEntries,
-} from "../../services/common/fetch-entries-service.js";
-import { deleteByIds } from "../../services/crud.js";
-import schemas from "../../schema/schemas.js";
-import { fetchAccessKey } from "../../auth/oauth.js";
-import { cacheAccessKey } from "../../auth/cache.js";
+} from "../services/fetch-entries-service.js";
 
 // Handle requests to create time entries
 export async function createTimeEntriesController(req, res) {
@@ -51,7 +52,6 @@ export async function fetchTimeEntriesController(req, res) {
     }
     cacheAccessKey(filters.creatorId, accessKeyRes.data);
     const fetchEntriesRes = await fetchEntriesService(filters);
-    console.log({ fetchEntriesRes });
     if (fetchEntriesRes.status !== 200) {
       return res.status(fetchEntriesRes.status).json(fetchEntriesRes);
     }
