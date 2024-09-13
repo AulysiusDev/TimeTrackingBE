@@ -28,7 +28,9 @@ export async function sendNotifications(userIds, creatorId, target, text) {
     } else {
       monday.setToken(accessKey);
     }
-    for (const userId of userIds) {
+    for (const userId of userIds.map((user) =>
+      typeof user === "object" && "id" in user ? user.id : user
+    )) {
       const query = `
       mutation($userId: ID!, $targetId: ID!, $text: String!, $targetType: NotificationTargetType!) {
       create_notification (user_id: $userId, target_id: $targetId, text: $text, target_type: $targetType) {
@@ -38,11 +40,11 @@ export async function sendNotifications(userIds, creatorId, target, text) {
       `;
       const variables = {
         targetId: target,
-        userId: parseInt(userId.id),
+        userId: userId,
         text: text,
         targetType: "Project",
       };
-      await monday.api(query, { variables });
+      const res = await monday.api(query, { variables });
     }
     return {
       message: "Success sending notifications",
@@ -192,10 +194,11 @@ export const findCreatedAtStatusChange = async (
       }
     );
     let myDate = new Date(columnChangeUpdates[0].created_at / 10000);
+    let nowDate = new Date();
     return {
       message: "Success",
       status: 200,
-      data: myDate ? myDate : new Date(),
+      data: myDate ? myDate : nowDate.toISOString(),
     };
   } catch (error) {
     console.error(error);
@@ -232,7 +235,7 @@ export const fetchUsers = async (itemId, peopleColumnId, id) => {
       peopleColumnId: peopleColumnId,
     };
     const res = await monday.api(query, { variables });
-    const parsedValue = JSON.parse(res.data.items[0].column_values[0].value);
+    const parsedValue = JSON.parse(res.data.items[0]?.column_values[0].value);
     // If there are no users asigned to the user column then lets see, use rate card id and if none then well
     return {
       message: "Success fetching users",

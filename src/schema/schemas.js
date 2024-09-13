@@ -19,6 +19,7 @@ const UsersTable = pgTable("users", {
   currency: text("currency").default("USD"),
   accessKey: text("access_key"),
   createdAt: timestamp("created_at").defaultNow(),
+  timezoneOffset: integer("timezone_offset").default(0),
 });
 
 // const ItemsTable = pgTable("items", {

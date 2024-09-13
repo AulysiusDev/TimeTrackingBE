@@ -2,7 +2,7 @@ import schemas, { UsersTable } from "../schema/schemas.js";
 import { createEntries, findById, updateField } from "../services/crud.js";
 import jwt from "jsonwebtoken";
 import initMondayClient from "monday-sdk-js";
-import { getCachedAccessKey } from "./cache.js";
+import { cacheAccessKey, getCachedAccessKey } from "./cache.js";
 
 const monday = initMondayClient();
 
@@ -237,6 +237,29 @@ export const fetchAccessKey = async (userId) => {
     };
   }
   // Found and return
+  return { message: "Authorized", status: 200, data: accessKey };
+};
+export const fetchAndCacheAccessKey = async (userId) => {
+  // Find creators access key, or use oAuth if not provided yet
+  const creatorRes = await findById(
+    schemas.UsersTable,
+    schemas.UsersTable.id,
+    userId
+  );
+  if (creatorRes.status !== 200) {
+    return { message: creatorRes.message, data: creatorRes.data, status: 500 };
+  }
+  //   No access key provided
+  const accessKey = creatorRes.data[0]?.accessKey;
+  if (!accessKey) {
+    return {
+      message: "Unauthorized",
+      status: 401,
+      data: { id: userId },
+    };
+  }
+  // Found and cache
+  cacheAccessKey(userId, accessKey);
   return { message: "Authorized", status: 200, data: accessKey };
 };
 

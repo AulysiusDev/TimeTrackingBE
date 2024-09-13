@@ -125,35 +125,25 @@ export async function createTimeEntriesService(entryData) {
 
 export async function validateAndCreateUsers(entryData) {
   // Create array of ids for validation
-  let userIds = entryData.user.ids.map((user) => user.id) || [];
-  if (!userIds.includes(entryData.user.creatorId)) {
-    userIds = [...userIds, entryData.user.creatorId];
+  let userIds = entryData.user.ids || [];
+  if (!userIds.some((user) => user.id === entryData.user.creatorId)) {
+    userIds.push({ id: entryData.user.creatorId });
   }
   if (!userIds.length) {
     return { message: "No users to validate.", status: 400, data: [] };
-  }
-
-  // Add creator to users if not already
-  if (
-    userIds.every(
-      (userId) => parseInt(userId) !== parseInt(entryData.user.creatorId)
-    )
-  ) {
-    userIds.push(entryData.user.creatorId);
   }
   let validatedUsers = [];
   // Create and validate user objects
   if (userIds.length) {
     for (const userId of userIds) {
       const userObj = {
-        id: parseInt(userId),
+        id: userId.id,
         ratePerHour: null,
         startTime: null,
         endTime: null,
         currency: null,
         days: null,
       };
-
       // Validate user objects
       const { data, hasError, message } = await validateUser(userObj);
       if (hasError === true) {
@@ -230,14 +220,12 @@ export async function validateAndCreateUsers(entryData) {
 export async function validateAndCreateLogs(entryData, dates) {
   let validatedLogs = [];
   const logsArray = createLogsArray(entryData, dates);
-  console.log({ length: logsArray.length });
-
   // Validate all logs
   for (const log of logsArray) {
     const { data, hasError, message } = await validateLog(log);
     if (hasError === true || hasError === undefined) {
       console.error(message || hasError);
-      return;
+      return { message: message, status: 500, data: data };
     }
     validatedLogs.push(data);
   }
@@ -269,29 +257,30 @@ export async function validateAndCreateLogs(entryData, dates) {
 
 // Create array of all logs for each date and each user id., with valid types and structure
 export const createLogsArray = (entryData, dates) => {
-  console.dir({ entryData }, { depth: null });
   const logsArray = entryData.user.ids.flatMap((userId) =>
     dates.map((date) => {
+      const middayDate = new Date(date);
+      middayDate.setHours(12, 0, 0, 0);
       const logObj = {
         userId: parseInt(userId.id),
-        itemId: JSON.stringify(entryData.item.id) || null,
+        itemId: entryData.item.id || null,
         subitemId:
           entryData.item.subitemId === "null" ||
           entryData.item.subitemId === null ||
           !entryData.item.subitemId
             ? null
-            : JSON.stringify(entryData.item.subitemId),
-        boardId: JSON.stringify(entryData.item.boardId) || null,
-        groupId: JSON.stringify(entryData.item.groupId) || null,
-        workspaceId: JSON.stringify(entryData.item.workspaceId) || null,
+            : entryData.item.subitemId,
+        boardId: entryData.item.boardId || null,
+        groupId: entryData.item.groupId || null,
+        workspaceId: entryData.item.workspaceId || null,
         // Need to figure this part out, would be nice to have to reference but not urgent - targetName
-        targetName: JSON.stringify(entryData.item.targeName) || null,
-        date: new Date(date),
+        targetName: entryData.item.targeName || null,
+        date: middayDate,
         totalHours: parseFloat(entryData.log.hours.total),
         billableHours: parseFloat(entryData.log.hours.billable),
         note: entryData.log.note || "",
         ratePerHour: parseFloat(entryData.rateCard.rate) || null,
-        currency: JSON.stringify(entryData.rateCard.currency?.value) || null,
+        currency: entryData.rateCard.currency?.value || null,
         status: 0,
       };
       return logObj;

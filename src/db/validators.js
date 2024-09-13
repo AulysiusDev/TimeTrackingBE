@@ -136,34 +136,30 @@ export async function validateAutomationConfig(logConfigData) {
   };
 }
 
-export const validateAutoConfigDetails = (autoConfig) => {
-  console.dir({ autoConfig }, { depth: null });
-  if (autoConfig.schedule === 0) {
-    if (
-      !autoConfig.startTime ||
-      !autoConfig.hours ||
-      (!autoConfig.startTime && !autoConfig.hours)
-    ) {
-      return {
-        message: "No start time or hours configured on automation config.",
-        status: 400,
-        data: autoConfig,
-      };
-    } else {
-      // No people column or rate card registered, so use creator id to log against
-      if (
-        !autoConfig.peopleColumnId &&
-        !autoConfig.rateCardId &&
-        autoConfig.userId
-      ) {
-        autoConfig = { ...autoConfig, usersIds: [autoConfig.userId] };
-      } else if (autoConfig.peopleColumnId) {
-        return {
-          message: "People columns selected",
-          status: 200,
-          data: autoConfig,
-        };
-      }
-    }
+export const validateSchedule = (config) => {
+  switch (config.schedule) {
+    case 0:
+      return validateScheduleZero(config);
+    case 1:
+      return validateScheduleOne(config);
+    case 2:
+      return validateScheduleTwo(config);
+    default:
+      return false;
   }
+};
+
+export const validateScheduleZero = (autoConfig) => {
+  return autoConfig.startTime && autoConfig.hours;
+};
+
+export const validateScheduleOne = (autoConfig) => {
+  return (
+    autoConfig.startTime &&
+    autoConfig.endTime &&
+    ((autoConfig.custom && autoConfig.customDays.length) || !autoConfig.custom)
+  );
+};
+export const validateScheduleTwo = (autoConfig) => {
+  return autoConfig.peopleColumnId || autoConfig.rateCardId;
 };
