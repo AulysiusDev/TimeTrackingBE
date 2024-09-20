@@ -5,14 +5,7 @@ import { validateSchedule } from "./db/validators.js";
 import { findById, findInArray } from "./services/crud.js";
 import initMondayClient from "monday-sdk-js";
 import { getCachedAccessKey } from "./auth/cache.js";
-import {
-  isBefore,
-  isAfter,
-  isSameDay,
-  getTime,
-  startOfDay,
-  endOfDay,
-} from "date-fns";
+import { isBefore, isAfter, isSameDay, startOfDay, endOfDay } from "date-fns";
 import { UsersTable } from "./schema/schemas.js";
 const monday = initMondayClient();
 
@@ -157,16 +150,20 @@ export function calculateHours(autoConfig, current, type) {
   switch (type) {
     case "middle":
       hours = maxHours;
+      console.log("middle: ", hours);
       break;
     case "start":
       hours = calculateStartDate();
+      console.log("start: ", hours);
       break;
     case "end":
       hours = calculateEndDate();
+      console.log("end: ", hours);
       break;
 
     case "single":
       hours = calculateSingleDate();
+      console.log("single: ", hours);
       break;
     default:
       hours = 0;
@@ -246,7 +243,7 @@ export const createEntryDataObj = (autoConfig) => {
   };
 };
 export const createUniqueHoursEntryDataObjects = (autoConfig, datesArray) => {
-  console.dir({ autoConfig }, { depth: null });
+  // console.dir({ autoConfig }, { depth: null });
   let startDateEntryData = null;
   let middleDatesEntryData = null;
   let endDateEntryData = null;
@@ -274,7 +271,6 @@ export const createUniqueHoursEntryDataObjects = (autoConfig, datesArray) => {
   console.log({ endDate });
   // Start date
   if (totalDates >= 1) {
-    console.log("start date");
     startDateEntryData = {
       entryData: createEntryDataObj(
         createAutoConfigWithHours(autoConfig, startDate, "start")
@@ -287,7 +283,6 @@ export const createUniqueHoursEntryDataObjects = (autoConfig, datesArray) => {
   }
   // end date
   if (totalDates >= 2) {
-    console.log("end dates");
     endDateEntryData = {
       entryData: createEntryDataObj(
         createAutoConfigWithHours(autoConfig, endDate, "end")
@@ -299,9 +294,7 @@ export const createUniqueHoursEntryDataObjects = (autoConfig, datesArray) => {
     }
   }
   // Middle dates
-  console.log({ middle: dates.indexOf(startDate.toISOString().split("T")[0]) });
   if (totalDates > 2) {
-    ("middle dates");
     const middleDates = dates.slice(
       dates.indexOf(startDate.toISOString().split("T")[0]) + 1,
       dates.indexOf(endDate.toISOString().split("T")[0])

@@ -1,6 +1,6 @@
 {
-  "id": "7f299f32-9187-4f82-9dd7-2aedc9a19975",
-  "prevId": "00000000-0000-0000-0000-000000000000",
+  "id": "2771a573-63f2-4f8f-8be1-8039c7e2a885",
+  "prevId": "9ba255d1-5572-418e-ba74-f758b69d2c6f",
   "version": "5",
   "dialect": "pg",
   "tables": {
@@ -277,6 +277,20 @@
           "primaryKey": false,
           "notNull": true
         },
+        "rate": {
+          "name": "rate",
+          "type": "numeric(8, 2)",
+          "primaryKey": false,
+          "notNull": false,
+          "default": 0
+        },
+        "currency": {
+          "name": "currency",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "'USD'"
+        },
         "created_at": {
           "name": "created_at",
           "type": "timestamp",
@@ -380,6 +394,40 @@
           "type": "text",
           "primaryKey": false,
           "notNull": false
+        },
+        "rate": {
+          "name": "rate",
+          "type": "numeric(8, 2)",
+          "primaryKey": false,
+          "notNull": false,
+          "default": 0
+        },
+        "currency": {
+          "name": "currency",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "'USD'"
+        },
+        "languages": {
+          "name": "languages",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "'[ENG]'"
+        },
+        "location": {
+          "name": "location",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "timezone_offset": {
+          "name": "timezone_offset",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false,
+          "default": 0
         },
         "access_key": {
           "name": "access_key",
@@ -663,13 +711,6 @@
           "primaryKey": true,
           "notNull": true
         },
-        "rate_per_hour": {
-          "name": "rate_per_hour",
-          "type": "numeric(8, 2)",
-          "primaryKey": false,
-          "notNull": false,
-          "default": 0
-        },
         "start_time": {
           "name": "start_time",
           "type": "integer",
@@ -687,6 +728,13 @@
           "type": "text",
           "primaryKey": false,
           "notNull": false
+        },
+        "rate": {
+          "name": "rate",
+          "type": "numeric(8, 2)",
+          "primaryKey": false,
+          "notNull": false,
+          "default": 0
         },
         "currency": {
           "name": "currency",
@@ -708,6 +756,12 @@
           "primaryKey": false,
           "notNull": false,
           "default": "now()"
+        },
+        "role": {
+          "name": "role",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
         },
         "updated_by": {
           "name": "updated_by",
@@ -857,6 +911,26 @@
           "primaryKey": false,
           "notNull": false
         },
+        "languages": {
+          "name": "languages",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "'[ENG]'"
+        },
+        "location": {
+          "name": "location",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "timezone_offset": {
+          "name": "timezone_offset",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false,
+          "default": 0
+        },
         "access_key": {
           "name": "access_key",
           "type": "text",
@@ -877,18 +951,17 @@
           "notNull": true,
           "default": "now()"
         },
+        "role": {
+          "name": "role",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
         "updated_by": {
           "name": "updated_by",
           "type": "integer",
           "primaryKey": false,
           "notNull": false
-        },
-        "timezone_offset": {
-          "name": "timezone_offset",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": false,
-          "default": 0
         }
       },
       "indexes": {

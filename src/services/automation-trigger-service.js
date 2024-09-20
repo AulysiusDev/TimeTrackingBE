@@ -140,14 +140,15 @@ const handleCreateLogs = async (outerConfig, itemId, creatorId) => {
         creatorId,
       },
     });
+    console.dir({ validatedUsersRes }, { depth: null });
     if (validatedUsersRes.status === 500 || validatedUsersRes.status === 400) {
       return { status: validatedUsersRes.status, ...validatedUsersRes };
     }
 
-    let testStartDate = new Date(Date.UTC(2024, 8, 5)); // 9th September 2024 11am
-    const testSDWithHours = new Date(testStartDate.setUTCHours(12, 30, 0, 0));
-    let testEndDate = new Date(Date.UTC(2024, 8, 12)); // 11th September 2024 3pm
-    const testEDWithHours = new Date(testEndDate.setUTCHours(15, 15, 0, 0));
+    // let testStartDate = new Date(Date.UTC(2024, 8, 5)); // 9th September 2024 11am
+    // const testSDWithHours = new Date(testStartDate.setUTCHours(22, 30, 0, 0));
+    // let testEndDate = new Date(Date.UTC(2024, 8, 12)); // 11th September 2024 3pm
+    // const testEDWithHours = new Date(testEndDate.setUTCHours(6, 15, 0, 0));
     for (let user of userIds) {
       config = {
         ...config,
@@ -163,13 +164,13 @@ const handleCreateLogs = async (outerConfig, itemId, creatorId) => {
       };
       user = userWithTimezoneOffset;
       const localStartDate = convertToUserTimezone(
-        // new Date(config.startDate),
-        testSDWithHours,
+        new Date(config.startDate),
+        // testSDWithHours,
         user.timezoneOffset
       );
       const localEndDate = convertToUserTimezone(
-        // new Date(config.endDate),
-        testEDWithHours,
+        new Date(config.endDate),
+        // testEDWithHours,
         user.timezoneOffset
       );
 

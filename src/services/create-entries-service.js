@@ -1,16 +1,19 @@
 import { fetchAccessKey } from "../auth/oauth.js";
 import { validateItem, validateLog, validateUser } from "../db/validators.js";
-import { createDatesArray, validateDatesArray } from "../helpers.js";
-import { createEntries, findById, findInArray } from "./crud.js";
 import {
-  fetchUsernamesAndPhotoThumbs,
-  sendNotifications,
-} from "./monday-service.js";
+  createDatesArray,
+  createUniqueIdsArr,
+  validateDatesArray,
+} from "../helpers.js";
+import { createEntries, findById, findInArray } from "./crud.js";
+import { sendNotifications } from "./monday-service.js";
 import { cacheAccessKey } from "../auth/cache.js";
 import { LogsTable, UsersTable } from "../schema/schemas.js";
+import { addUsernamesWithPhotoThumbs } from "./fetch-entries-service.js";
 
 // Root function, creates time logs from input data, across a period and for multiple users if selected
 export async function createTimeEntriesService(entryData) {
+  console.dir({ entryData }, { depth: null });
   // Validate user objects and create them in db if not already, this is so rate crads can be created etc.
   const validatedUsersRes = await validateAndCreateUsers(entryData);
   if (validatedUsersRes.status === 500 || validatedUsersRes.status === 400) {
@@ -57,16 +60,13 @@ export async function createTimeEntriesService(entryData) {
   }
   const createLogsRes = await validateAndCreateLogs(entryData, dates);
   // Return error for user if error
-  if (createLogsRes.status === 500) {
-    return {
-      status: 500,
-      message: createLogsRes.message,
-      data: createLogsRes.data,
-    };
+  if (createLogsRes.status !== 201) {
+    return createLogsRes;
   }
+  console.dir({ createLogsRes }, { depth: null });
 
   // Send notifications to creator id
-  const target = entryData.item.id
+  let target = entryData.item.id
     ? entryData.item.id
     : entryData.groupId
     ? entryData.groupId
@@ -74,6 +74,7 @@ export async function createTimeEntriesService(entryData) {
     ? entryData.boardId
     : entryData.workspaceId;
 
+  target = typeof target === "string" ? target : JSON.stringify(target);
   const dateString =
     new Date(entryData.log.date).getDate() ===
     new Date(entryData.log.endDate).getDate()
@@ -82,14 +83,15 @@ export async function createTimeEntriesService(entryData) {
           entryData.log.endDate
         ).getDate()}`;
 
-  // Send notificatio with creator's name, or id if not found.
-  const usernamesRes = await fetchUsernamesAndPhotoThumbs(
-    entryData.user.creatorId,
+  const logsWithUsernamesPhotoThumbsRes = await addUsernamesWithPhotoThumbs(
+    createUniqueIdsArr(createLogsRes.data),
+    createLogsRes.data,
     entryData.user.creatorId
   );
+  console.dir({ logsWithUsernamesPhotoThumbsRes }, { depth: null });
   const creatorUsername =
-    usernamesRes.status === 200
-      ? usernamesRes?.data?.data?.users[0]?.name
+    logsWithUsernamesPhotoThumbsRes.status === 200
+      ? logsWithUsernamesPhotoThumbsRes?.data?.data?.users[0]?.name
       : `a user with this id: ${entryData.user.creatorId}`;
 
   // Send notification informing user of time log creation
@@ -118,14 +120,15 @@ export async function createTimeEntriesService(entryData) {
 
   return {
     status: 201,
-    message: createLogsRes.message,
-    data: createLogsRes.data,
+    message: logsWithUsernamesPhotoThumbsRes.message,
+    data: logsWithUsernamesPhotoThumbsRes.data,
   };
 }
 
 export async function validateAndCreateUsers(entryData) {
   // Create array of ids for validation
-  let userIds = entryData.user.ids || [];
+  let userIds =
+    entryData.user.ids?.map((user) => ({ id: parseInt(user.id) })) || [];
   if (!userIds.some((user) => user.id === entryData.user.creatorId)) {
     userIds.push({ id: entryData.user.creatorId });
   }
@@ -138,11 +141,7 @@ export async function validateAndCreateUsers(entryData) {
     for (const userId of userIds) {
       const userObj = {
         id: userId.id,
-        ratePerHour: null,
-        startTime: null,
-        endTime: null,
-        currency: null,
-        days: null,
+        name: null,
       };
       // Validate user objects
       const { data, hasError, message } = await validateUser(userObj);
@@ -263,16 +262,28 @@ export const createLogsArray = (entryData, dates) => {
       middayDate.setHours(12, 0, 0, 0);
       const logObj = {
         userId: parseInt(userId.id),
-        itemId: entryData.item.id || null,
+        itemId:
+          typeof entryData.item.id === "string"
+            ? entryData.item.id
+            : JSON.stringify(entryData.item.id) || null,
         subitemId:
           entryData.item.subitemId === "null" ||
           entryData.item.subitemId === null ||
           !entryData.item.subitemId
             ? null
             : entryData.item.subitemId,
-        boardId: entryData.item.boardId || null,
-        groupId: entryData.item.groupId || null,
-        workspaceId: entryData.item.workspaceId || null,
+        boardId:
+          typeof entryData.item.boardId === "string"
+            ? entryData.item.boardId
+            : JSON.stringify(entryData.item.boardId) || null,
+        groupId:
+          typeof entryData.item.groupId === "string"
+            ? entryData.item.groupId
+            : JSON.stringify(entryData.item.groupId) || null,
+        workspaceId:
+          typeof entryData.item.workspaceId === "string"
+            ? entryData.item.workspaceId
+            : JSON.stringify(entryData.item.workspaceId) || null,
         // Need to figure this part out, would be nice to have to reference but not urgent - targetName
         targetName: entryData.item.targeName || null,
         date: middayDate,

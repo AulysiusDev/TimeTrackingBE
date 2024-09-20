@@ -67,6 +67,7 @@ export const fetchUsernamesAndPhotoThumbs = async (userIds, creatorId) => {
   if (!Array.isArray(userIds)) {
     userIds = [userIds];
   }
+  console.log({ userIds });
   try {
     const accessKey = getCachedAccessKey(creatorId);
     if (!accessKey) {

@@ -8,8 +8,8 @@ import { getDrizzleDbClient } from "./db-client.js";
 import { fetchUsernamesAndPhotoThumbs } from "./monday-service.js";
 import { createUniqueIdsArr } from "../helpers.js";
 
-// Will fetch data from any table with nay filters
-// NEED: targetName, tableName, targetType (must be string: group, item, board or workspace)
+// Will fetch data from any table with any filters
+// NEED: targetId, tableName, targetType (must be string: group, item, board or workspace)
 export const fetchEntriesService = async (filters = {}) => {
   let {
     tableName,
@@ -188,6 +188,7 @@ export const addUsernamesWithPhotoThumbs = async (
     uniqueUserIdsArr,
     userId
   );
+  console.dir({ namesPhotosRes }, { depth: null });
   if (namesPhotosRes.status !== 200) {
     const logsWithoutUserData = logs.map((log) => {
       log.name = null;
@@ -204,6 +205,7 @@ export const addUsernamesWithPhotoThumbs = async (
   for (let user of namesPhotosRes.data) {
     const userId = parseInt(user.id);
     logs.forEach((log) => {
+      console.dir({ log }, { depth: null });
       if (log.userId === userId) {
         log.username = user.name;
         log.photoThumb = user.photo_thumb;

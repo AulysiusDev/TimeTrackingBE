@@ -3,6 +3,29 @@ import { z } from "zod";
 export async function validateUser(userObj) {
   const user = z.object({
     id: z.number(),
+    name: z.number().nullable(),
+  });
+  let hasError;
+  let validData = {};
+  let message;
+  try {
+    validData = user.parse(userObj);
+    hasError = false;
+  } catch (error) {
+    console.error(error);
+    console.log("User validation error");
+    hasError = true;
+    message = "Invalid user data";
+  }
+  return {
+    data: validData,
+    hasError: hasError,
+    message: "",
+  };
+}
+export async function validateRatecard(rateCardObj) {
+  const user = z.object({
+    id: z.number(),
     ratePerHour: z.number().nullable(),
     startTime: z.number().nullable(),
     endTime: z.number().nullable(),
@@ -17,9 +40,9 @@ export async function validateUser(userObj) {
     hasError = false;
   } catch (error) {
     console.error(error);
-    console.log("User validation error");
+    console.log("Ratecard validation error");
     hasError = true;
-    message = "Invalid user data";
+    message = "Invalid ratecard data";
   }
   return {
     data: validData,

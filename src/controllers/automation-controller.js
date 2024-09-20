@@ -82,6 +82,7 @@ export const handleAutomationTriggerController = async (req, res) => {
   console.log("Automation triggered");
   try {
     const result = await handleAutomationTriggerService(req.body.payload);
+    console.log({ result });
     return res.status(200).send({});
   } catch (error) {
     console.error(error);
