@@ -5,6 +5,7 @@ export async function createEntries(schema, value) {
   try {
     const db = await getDrizzleDbClient();
     const results = await db.insert(schema).values(value).returning();
+    console.dir({ results }, { depth: null });
     return {
       message: `${results.length} entr${
         results.length > 1 ? "ies" : "y"
@@ -29,6 +30,34 @@ export async function findById(schema, schemaId, id) {
       .select()
       .from(schema)
       .where(eq(schemaId, parseInt(id)));
+    if (results.length > 0) {
+      return {
+        message: `${results.length} entr${
+          results.length > 1 ? "ies" : "y"
+        } fetched successfully.`,
+        status: 200,
+        data: results,
+      };
+    } else {
+      return {
+        message: "No entries found matching this id.",
+        status: 404,
+        data: [],
+      };
+    }
+  } catch (error) {
+    console.error(error);
+    return {
+      message: error.message || "Error fetching entries",
+      status: error.status || 500,
+      data: error,
+    };
+  }
+}
+export async function findAll(schema, id) {
+  try {
+    const db = await getDrizzleDbClient();
+    const results = await db.select().from(schema);
     if (results.length > 0) {
       return {
         message: `${results.length} entr${
@@ -103,7 +132,7 @@ export async function deleteByIds(schema, schemaId, ids) {
       .returning({ deletedId: schemaId });
     return { message: "Deleted successfully", status: 200, data: res };
   } catch (error) {
-    console.error("Error deleting logs:", error);
+    console.error("Error deleting entries:", error);
     return {
       message: error.message || "Error deleting entries",
       status: error.status || 500,

@@ -1,0 +1,1 @@
+ALTER TABLE "ratecards" RENAME COLUMN "days_array" TO "days";

@@ -18,6 +18,11 @@ import {
   unsubscribeController,
 } from "../controllers/automation-controller.js";
 import { handleAutomationTriggerController } from "../controllers/automation-controller.js";
+import {
+  createRatecardsController,
+  deleteRatecardsController,
+  fetchRatecardsController,
+} from "../controllers/object/ratecards-controller.js";
 
 const router = express.Router();
 
@@ -72,5 +77,23 @@ router.post(
 );
 router.post("/unsubscribe", authorizeRequest, unsubscribeController);
 router.post("/subscribe", authorizeRequest, subscribeController);
+
+// Object routes
+
+router.post(
+  "/ratecards/create-ratecards",
+  authorizeRegularRequest,
+  createRatecardsController
+);
+router.get(
+  "/ratecards/fetch-ratecards",
+  authorizeRegularRequest,
+  fetchRatecardsController
+);
+router.delete(
+  "/ratecards/delete-ratecards",
+  authorizeRegularRequest,
+  deleteRatecardsController
+);
 
 export default router;

@@ -22,6 +22,20 @@
       "when": 1726820330622,
       "tag": "0002_flat_tigra",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "5",
+      "when": 1727098069957,
+      "tag": "0003_smiling_electro",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "5",
+      "when": 1727956309622,
+      "tag": "0004_clean_vengeance",
+      "breakpoints": true
     }
   ]
 }

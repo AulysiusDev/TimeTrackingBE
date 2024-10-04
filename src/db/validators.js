@@ -24,9 +24,13 @@ export async function validateUser(userObj) {
   };
 }
 export async function validateRatecard(rateCardObj) {
-  const user = z.object({
-    id: z.number(),
-    ratePerHour: z.number().nullable(),
+  const ratecard = z.object({
+    role: z.string(),
+    createdAt: z.date(),
+    updatedAt: z.date(),
+    updatedBy: z.number(),
+    rate: z.number(),
+    department: z.string().nullable(),
     startTime: z.number().nullable(),
     endTime: z.number().nullable(),
     currency: z.string().nullable(),
@@ -36,7 +40,7 @@ export async function validateRatecard(rateCardObj) {
   let validData = {};
   let message;
   try {
-    validData = user.parse(userObj);
+    validData = ratecard.parse(rateCardObj);
     hasError = false;
   } catch (error) {
     console.error(error);

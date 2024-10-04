@@ -88,7 +88,6 @@ export async function createTimeEntriesService(entryData) {
     createLogsRes.data,
     entryData.user.creatorId
   );
-  console.dir({ logsWithUsernamesPhotoThumbsRes }, { depth: null });
   const creatorUsername =
     logsWithUsernamesPhotoThumbsRes.status === 200
       ? logsWithUsernamesPhotoThumbsRes?.data?.data?.users[0]?.name

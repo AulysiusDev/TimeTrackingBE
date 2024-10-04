@@ -1,0 +1,1 @@
+ALTER TABLE "ratecards" ADD COLUMN "department" text;

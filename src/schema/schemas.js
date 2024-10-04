@@ -80,9 +80,10 @@ const RatecardTable = pgTable(
     id: serial("id").primaryKey(),
     startTime: integer("start_time"),
     endTime: integer("end_time"),
-    days: text("days_array"),
+    days: text("days"),
     rate: numeric("rate", { precision: 8, scale: 2 }).default(0),
     currency: text("currency").default("USD"),
+    department: text("department"),
     createdAt: timestamp("created_at").defaultNow(),
     updatedAt: timestamp("updated_at")
       .defaultNow()
