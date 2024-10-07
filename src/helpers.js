@@ -41,7 +41,6 @@ export const verifySessionToken = (sessionToken) => {
   const decodedToken = jwt.verify(sessionToken, process.env.CLIENT_SECRET);
   return decodedToken;
 };
-
 // Create array of dates to create logs from using start and end dates
 export const createDatesArray = (start, end, days = []) => {
   // Convert start and end to UTC dates (no time component)

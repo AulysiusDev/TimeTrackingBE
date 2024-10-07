@@ -314,6 +314,7 @@ const LogsTable = pgTable(
       null
     ),
     currency: text("currency").default(null),
+    // status: 0 = Open, 1 = Pending/submitted, 2 = approved 3 =rejected
     status: integer("status").default(0).notNull(),
   },
   (table) => ({
