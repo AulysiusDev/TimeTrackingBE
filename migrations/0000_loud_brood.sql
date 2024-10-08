@@ -31,9 +31,16 @@ CREATE TABLE IF NOT EXISTS "automationconfig" (
 );
 --> statement-breakpoint
 CREATE TABLE IF NOT EXISTS "client_ratecards" (
+	"id" serial PRIMARY KEY NOT NULL,
 	"client_id" integer NOT NULL,
 	"ratecard_id" integer NOT NULL,
+	"rate" numeric(8, 2) DEFAULT 0,
+	"start_time" numeric(8, 2) DEFAULT 0,
+	"end_time" numeric(8, 2) DEFAULT 0,
+	"days" text,
+	"currency" text DEFAULT 'USD',
 	"created_at" timestamp DEFAULT now(),
+	"user_ratecard_id" integer,
 	"updated_at" timestamp DEFAULT now(),
 	"updated_by" integer
 );
@@ -42,6 +49,11 @@ CREATE TABLE IF NOT EXISTS "clients" (
 	"id" serial PRIMARY KEY NOT NULL,
 	"company_name" text NOT NULL,
 	"industry" text,
+	"rate" numeric(8, 2) DEFAULT 0,
+	"currency" text DEFAULT 'USD',
+	"languages" text DEFAULT '[ENG]',
+	"location" text,
+	"timezone_offset" integer DEFAULT 0,
 	"access_key" text,
 	"created_at" timestamp DEFAULT now(),
 	"updated_at" timestamp DEFAULT now(),
@@ -73,17 +85,20 @@ CREATE TABLE IF NOT EXISTS "logs" (
 --> statement-breakpoint
 CREATE TABLE IF NOT EXISTS "ratecards" (
 	"id" serial PRIMARY KEY NOT NULL,
-	"rate_per_hour" numeric(8, 2) DEFAULT 0,
-	"start_time" integer,
-	"end_time" integer,
-	"days_array" text,
+	"start_time" numeric(8, 2) DEFAULT 0,
+	"end_time" numeric(8, 2) DEFAULT 0,
+	"days" text,
+	"rate" numeric(8, 2) DEFAULT 0,
 	"currency" text DEFAULT 'USD',
+	"department" text,
 	"created_at" timestamp DEFAULT now(),
 	"updated_at" timestamp DEFAULT now(),
+	"role" text,
 	"updated_by" integer
 );
 --> statement-breakpoint
 CREATE TABLE IF NOT EXISTS "user_ratecards" (
+	"id" serial PRIMARY KEY NOT NULL,
 	"user_id" integer NOT NULL,
 	"ratecard_id" integer NOT NULL,
 	"created_at" timestamp DEFAULT now(),
@@ -94,11 +109,14 @@ CREATE TABLE IF NOT EXISTS "user_ratecards" (
 CREATE TABLE IF NOT EXISTS "users" (
 	"id" serial PRIMARY KEY NOT NULL,
 	"team" text,
+	"languages" text DEFAULT '[ENG]',
+	"location" text,
+	"timezone_offset" integer DEFAULT 0,
 	"access_key" text,
 	"created_at" timestamp DEFAULT now(),
 	"updated_at" timestamp DEFAULT now() NOT NULL,
-	"updated_by" integer,
-	"timezone_offset" integer DEFAULT 0
+	"role" text,
+	"updated_by" integer
 );
 --> statement-breakpoint
 CREATE INDEX IF NOT EXISTS "idx_automation_config_user_id" ON "automationconfig" ("user_id");--> statement-breakpoint
@@ -145,6 +163,12 @@ END $$;
 --> statement-breakpoint
 DO $$ BEGIN
  ALTER TABLE "client_ratecards" ADD CONSTRAINT "client_ratecards_ratecard_id_ratecards_id_fk" FOREIGN KEY ("ratecard_id") REFERENCES "ratecards"("id") ON DELETE cascade ON UPDATE no action;
+EXCEPTION
+ WHEN duplicate_object THEN null;
+END $$;
+--> statement-breakpoint
+DO $$ BEGIN
+ ALTER TABLE "client_ratecards" ADD CONSTRAINT "client_ratecards_user_ratecard_id_user_ratecards_id_fk" FOREIGN KEY ("user_ratecard_id") REFERENCES "user_ratecards"("id") ON DELETE set null ON UPDATE no action;
 EXCEPTION
  WHEN duplicate_object THEN null;
 END $$;
