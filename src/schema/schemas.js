@@ -108,7 +108,7 @@ const RateCardRelations = relations(RatecardTable, ({ one }) => ({
 
 const UserRatecardTable = pgTable(
   "user_ratecards",
-  {
+  { id: serial("id").primaryKey(),
     userId: integer("user_id")
       .references(() => UsersTable.id, { onDelete: "cascade" })
       .notNull(),
@@ -152,7 +152,7 @@ const UserRatecardRelations = relations(UserRatecardTable, ({ one }) => ({
 
 const ClientRatecardTable = pgTable(
   "client_ratecards",
-  {
+  { id: serial("id").primaryKey(),
     clientId: integer("client_id")
       .references(() => ClientsTable.id, { onDelete: "cascade" })
       .notNull(),
@@ -160,8 +160,13 @@ const ClientRatecardTable = pgTable(
       .references(() => RatecardTable.id, { onDelete: "cascade" })
       .notNull(),
     rate: numeric("rate", { precision: 8, scale: 2 }).default(0),
+    startTime: numeric("start_time", { precision: 8, scale: 2 }).default(0),
+    endTime: numeric("end_time", { precision: 8, scale: 2 }).default(0),
+    days: text("days"),
     currency: text("currency").default("USD"),
     createdAt: timestamp("created_at").defaultNow(),
+    userRatecardId: integer("user_ratecard_id")
+    .references(() => UserRatecardTable.id, {onDelete: "set null"}),
     updatedAt: timestamp("updated_at")
       .defaultNow()
       .$onUpdate(() => new Date()),
@@ -183,6 +188,12 @@ const ClientRatecardRelations = relations(ClientRatecardTable, ({ one }) => ({
     relationName: "client",
     fields: [ClientRatecardTable.clientId],
     references: [ClientsTable.id],
+  }),
+  // Optional if we want to assign a specific user to that ratecard
+  user: one(UserRatecardTable, {
+    relationName: "user",
+    fields: [ClientRatecardTable.userRatecardId],
+    references: [UserRatecardTable.id],
   }),
   ratecard: one(RatecardTable, {
     relationName: "ratecard",

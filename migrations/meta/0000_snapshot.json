@@ -1,5 +1,5 @@
 {
-  "id": "7f299f32-9187-4f82-9dd7-2aedc9a19975",
+  "id": "280d5af5-4c71-4ee4-8dc3-1c315614e08b",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "5",
   "dialect": "pg",
@@ -265,6 +265,12 @@
       "name": "client_ratecards",
       "schema": "",
       "columns": {
+        "id": {
+          "name": "id",
+          "type": "serial",
+          "primaryKey": true,
+          "notNull": true
+        },
         "client_id": {
           "name": "client_id",
           "type": "integer",
@@ -277,12 +283,52 @@
           "primaryKey": false,
           "notNull": true
         },
+        "rate": {
+          "name": "rate",
+          "type": "numeric(8, 2)",
+          "primaryKey": false,
+          "notNull": false,
+          "default": 0
+        },
+        "start_time": {
+          "name": "start_time",
+          "type": "numeric(8, 2)",
+          "primaryKey": false,
+          "notNull": false,
+          "default": 0
+        },
+        "end_time": {
+          "name": "end_time",
+          "type": "numeric(8, 2)",
+          "primaryKey": false,
+          "notNull": false,
+          "default": 0
+        },
+        "days": {
+          "name": "days",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "currency": {
+          "name": "currency",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "'USD'"
+        },
         "created_at": {
           "name": "created_at",
           "type": "timestamp",
           "primaryKey": false,
           "notNull": false,
           "default": "now()"
+        },
+        "user_ratecard_id": {
+          "name": "user_ratecard_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
         },
         "updated_at": {
           "name": "updated_at",
@@ -342,6 +388,19 @@
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
+        "client_ratecards_user_ratecard_id_user_ratecards_id_fk": {
+          "name": "client_ratecards_user_ratecard_id_user_ratecards_id_fk",
+          "tableFrom": "client_ratecards",
+          "tableTo": "user_ratecards",
+          "columnsFrom": [
+            "user_ratecard_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "set null",
+          "onUpdate": "no action"
+        },
         "client_ratecards_updated_by_users_id_fk": {
           "name": "client_ratecards_updated_by_users_id_fk",
           "tableFrom": "client_ratecards",
@@ -380,6 +439,40 @@
           "type": "text",
           "primaryKey": false,
           "notNull": false
+        },
+        "rate": {
+          "name": "rate",
+          "type": "numeric(8, 2)",
+          "primaryKey": false,
+          "notNull": false,
+          "default": 0
+        },
+        "currency": {
+          "name": "currency",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "'USD'"
+        },
+        "languages": {
+          "name": "languages",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "'[ENG]'"
+        },
+        "location": {
+          "name": "location",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "timezone_offset": {
+          "name": "timezone_offset",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false,
+          "default": 0
         },
         "access_key": {
           "name": "access_key",
@@ -663,30 +756,32 @@
           "primaryKey": true,
           "notNull": true
         },
-        "rate_per_hour": {
-          "name": "rate_per_hour",
+        "start_time": {
+          "name": "start_time",
           "type": "numeric(8, 2)",
           "primaryKey": false,
           "notNull": false,
           "default": 0
         },
-        "start_time": {
-          "name": "start_time",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": false
-        },
         "end_time": {
           "name": "end_time",
-          "type": "integer",
+          "type": "numeric(8, 2)",
           "primaryKey": false,
-          "notNull": false
+          "notNull": false,
+          "default": 0
         },
-        "days_array": {
-          "name": "days_array",
+        "days": {
+          "name": "days",
           "type": "text",
           "primaryKey": false,
           "notNull": false
+        },
+        "rate": {
+          "name": "rate",
+          "type": "numeric(8, 2)",
+          "primaryKey": false,
+          "notNull": false,
+          "default": 0
         },
         "currency": {
           "name": "currency",
@@ -694,6 +789,12 @@
           "primaryKey": false,
           "notNull": false,
           "default": "'USD'"
+        },
+        "department": {
+          "name": "department",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
         },
         "created_at": {
           "name": "created_at",
@@ -708,6 +809,12 @@
           "primaryKey": false,
           "notNull": false,
           "default": "now()"
+        },
+        "role": {
+          "name": "role",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
         },
         "updated_by": {
           "name": "updated_by",
@@ -747,6 +854,12 @@
       "name": "user_ratecards",
       "schema": "",
       "columns": {
+        "id": {
+          "name": "id",
+          "type": "serial",
+          "primaryKey": true,
+          "notNull": true
+        },
         "user_id": {
           "name": "user_id",
           "type": "integer",
@@ -857,6 +970,26 @@
           "primaryKey": false,
           "notNull": false
         },
+        "languages": {
+          "name": "languages",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "'[ENG]'"
+        },
+        "location": {
+          "name": "location",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "timezone_offset": {
+          "name": "timezone_offset",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false,
+          "default": 0
+        },
         "access_key": {
           "name": "access_key",
           "type": "text",
@@ -877,18 +1010,17 @@
           "notNull": true,
           "default": "now()"
         },
+        "role": {
+          "name": "role",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
         "updated_by": {
           "name": "updated_by",
           "type": "integer",
           "primaryKey": false,
           "notNull": false
-        },
-        "timezone_offset": {
-          "name": "timezone_offset",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": false,
-          "default": 0
         }
       },
       "indexes": {
